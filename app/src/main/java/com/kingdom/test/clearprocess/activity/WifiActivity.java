@@ -302,36 +302,11 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
     private void connectWifi(int position, List<WifiInfoBean> wifiInfo, String passward) {
         int type = wifiInfo.get(position).getType();
-        WifiAdmin wifiAdmin = new WifiAdmin(WifiActivity.this) {
-            @Override
-            public Intent myRegisterReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-                WifiActivity.this.registerReceiver(receiver, filter);
-                return null;
-            }
-
-            @Override
-            public void myUnregisterReceiver(BroadcastReceiver receiver) {
-                WifiActivity.this.unregisterReceiver(receiver);
-            }
-
-            @Override
-            public void onNotifyWifiConnected() {
-                Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNotifyWifiConnectFailed() {
-                Toast.makeText(WifiActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        wifiAdmin.addNetwork(wifiInfo.get(position).getWifiName(), passward, type);
+        WifiAdmin wifiAdmin = new WifiAdmin(WifiActivity.this);
+        wifiAdmin.addNetwork(wifiAdmin.createWifiInfo(wifiInfo.get(position).getWifiName(), passward, type));
     }
-
-
     private void registBroadCast() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(NETWORK_STATE_CHANGED_ACTION);//监听网络连接的广播

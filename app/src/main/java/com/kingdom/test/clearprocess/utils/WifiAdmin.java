@@ -1,9 +1,6 @@
 package com.kingdom.test.clearprocess.utils;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -13,10 +10,8 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public abstract class WifiAdmin {
+public  class WifiAdmin {
       
     private static final String TAG = "WifiAdmin";  
       
@@ -58,18 +53,9 @@ public abstract class WifiAdmin {
         }  
     }  
   
-    public abstract Intent myRegisterReceiver(BroadcastReceiver receiver, IntentFilter filter);
-      
-    public abstract void myUnregisterReceiver(BroadcastReceiver receiver);  
-      
-    public abstract void onNotifyWifiConnected();  
-      
-    public abstract void onNotifyWifiConnectFailed();  
-      
+
     // 添加一个网络并连接  
-    public void addNetwork(WifiConfiguration wcg) {  
-          
-        register();  
+    public void addNetwork(WifiConfiguration wcg) {
           
 //        WifiApAdmin.closeWifiAp(mContext);//关闭热点
         int wcgID = mWifiManager.addNetwork(wcg);
@@ -79,119 +65,7 @@ public abstract class WifiAdmin {
     public static final int TYPE_NO_PASSWD = 0x11;  
     public static final int TYPE_WEP = 0x12;  
     public static final int TYPE_WPA = 0x13;  
-      
-    public void addNetwork(String ssid, String passwd, int type) {  
 
-        if (type != TYPE_NO_PASSWD && type != TYPE_WEP && type != TYPE_WPA) {  
-            Log.e(TAG, "addNetwork() ## unknown type = " + type);  
-        }  
-          
-        stopTimer();  
-        unRegister();  
-          
-        addNetwork(createWifiInfo(ssid, passwd, type));  
-    }  
-  
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {  
-  
-        @Override  
-        public void onReceive(Context context, Intent intent) {  
-            // TODO Auto-generated method stub  
-            if (intent.getAction().equals(WifiManager.RSSI_CHANGED_ACTION)) {  
-                Log.d(TAG, "RSSI changed");  
-                  
-                //有可能是正在获取，或者已经获取了  
-                Log.d(TAG, " intent is " + WifiManager.RSSI_CHANGED_ACTION);  
-                  
-                if (isWifiContected(mContext) == WIFI_CONNECTED) {  
-                    stopTimer();  
-                    onNotifyWifiConnected();  
-                    unRegister();  
-                } else if (isWifiContected(mContext) == WIFI_CONNECT_FAILED) {  
-                    stopTimer();  
-//                    closeWifi();
-                    onNotifyWifiConnectFailed();  
-                    unRegister();  
-                } else if (isWifiContected(mContext) == WIFI_CONNECTING) {  
-                      
-                }  
-            }  
-        }  
-    };  
-      
-    private final int STATE_REGISTRING = 0x01;  
-    private final int STATE_REGISTERED = 0x02;  
-    private final int STATE_UNREGISTERING = 0x03;  
-    private final int STATE_UNREGISTERED = 0x04;  
-      
-    private int mHaveRegister = STATE_UNREGISTERED;  
-    private synchronized void register() {  
-        Log.v(TAG, "register() ##mHaveRegister = " + mHaveRegister);  
-  
-        if (mHaveRegister == STATE_REGISTRING   
-                || mHaveRegister == STATE_REGISTERED) {  
-            return ;  
-        }  
-          
-        mHaveRegister = STATE_REGISTRING;  
-        myRegisterReceiver(mBroadcastReceiver, new IntentFilter(WifiManager.RSSI_CHANGED_ACTION));  
-        mHaveRegister = STATE_REGISTERED;  
-          
-        startTimer();  
-    }  
-      
-    private synchronized void unRegister() {  
-        Log.v(TAG, "unRegister() ##mHaveRegister = " + mHaveRegister);  
-          
-        if (mHaveRegister == STATE_UNREGISTERED || mHaveRegister == STATE_UNREGISTERING) {
-            return ;  
-        }  
-          
-        mHaveRegister = STATE_UNREGISTERING;  
-        myUnregisterReceiver(mBroadcastReceiver);  
-        mHaveRegister = STATE_UNREGISTERED;  
-    }  
-      
-    private Timer mTimer = null;
-    private void startTimer() {  
-        if (mTimer != null) {  
-            stopTimer();  
-        }  
-          
-        mTimer = new Timer(true);  
-//      mTimer.schedule(mTimerTask, 0, 20 * 1000);// 20s  
-        mTimer.schedule(mTimerTask, 30 * 1000);  
-    }  
-      
-    private TimerTask mTimerTask = new TimerTask() {
-          
-        @Override  
-        public void run() {  
-            // TODO Auto-generated method stub  
-            Log.e(TAG, "timer out!");  
-            onNotifyWifiConnectFailed();  
-            unRegister();  
-        }  
-    };  
-      
-    private void stopTimer() {  
-        if (mTimer != null) {  
-            mTimer.cancel();  
-            mTimer = null;  
-        }  
-    }  
-      
-    @Override  
-    protected void finalize() {  
-        try {  
-            super.finalize();  
-            unRegister();  
-        } catch (Throwable e) {  
-            // TODO Auto-generated catch block  
-            e.printStackTrace();  
-        }  
-    }  
-      
     public WifiConfiguration createWifiInfo(String SSID, String password, int type) {  
           
         Log.v("wifiaaaaa", "SSID = " + SSID + "## Password = " + password + "## Type = " + type);
