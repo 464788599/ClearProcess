@@ -253,5 +253,6 @@ public  class WifiAdmin {
     // 得到WifiInfo的所有信息包  
     public String getWifiInfo() {  
         return (mWifiInfo == null) ? "NULL" : mWifiInfo.toString();  
-    }  
+    }
+
 }  

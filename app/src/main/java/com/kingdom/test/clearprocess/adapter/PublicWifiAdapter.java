@@ -52,12 +52,14 @@ public class PublicWifiAdapter extends BaseAdapter {
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
         Log.i("qqww",Math.abs(getItem(position).getLevel())+"");
         int level = Math.abs(getItem(position).getLevel());
-        if (level>0&&level<50){
-            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_2_no_lock);
-        }else if (level>=50&&level<70){
-            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_1_no_lock);
-        }else if (level>=70&&level<100){
-            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_0_no_lock);
+        if (level==0){
+            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_no_lock_0_level);
+        }else if (level==1){
+            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_no_lock_1_level);
+        }else if (level==2){
+            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_no_lock_2_level);
+        }else if (level==3){
+            viewHolder.wifiIcon.setImageResource(R.drawable.wifi_no_lock_3_level);
         }
         viewHolder.wifiName.setText(getItem(position).getWifiName());
         return convertView;

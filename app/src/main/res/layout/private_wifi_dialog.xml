@@ -14,7 +14,7 @@
             android:layout_height="@dimen/dimen_100_dip"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/dimen_80_dip"
-            android:background="@drawable/wifi_default" />
+            android:src="@drawable/wifi_default" />
 
         <ImageView
             android:layout_width="match_parent"

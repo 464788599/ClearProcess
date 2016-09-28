@@ -41,6 +41,7 @@
         android:layout_height="@dimen/dimen_550_dip">
 
         <LinearLayout
+            android:visibility="visible"
             android:id="@+id/layout_wifi_speed"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/dimen_40_dip"
@@ -78,13 +79,23 @@
                 android:layout_height="wrap_content"
                 android:text="0B/s"/>
         </LinearLayout>
-
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_connect_state"
+            android:text="开始连接"
+            android:layout_below="@+id/tv_wifi_name"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/dimen_20_dip"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <Button
             android:id="@+id/btn_wifi_optimize"
             android:layout_marginTop="@dimen/dimen_40_dip"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/layout_wifi_speed"
             android:layout_width="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/dimen_40_dip"
             android:background="@android:color/transparent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
@@ -97,12 +108,13 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textSize="@dimen/dimen_80_dip"
-            android:text="当前网络的名字"
+            android:text="正在获取网络..."
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
     <LinearLayout
+        android:background="@android:color/white"
         android:visibility="gone"
         android:id="@+id/layout_wifi_list"
         android:layout_width="match_parent"
