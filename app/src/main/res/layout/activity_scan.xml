@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color2"
+    tools:context=".activity.MemoryActivity">
+
+    <RelativeLayout
+        android:id="@+id/layout_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/back" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@+id/iv_back"
+            android:text="内存加速"
+            android:textSize="17sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_release_memory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout_title"
+        android:layout_marginLeft="75dp">
+        <TextView
+            android:id="@+id/tv_release_memory_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="0%"
+            android:textSize="70sp" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_release_memory_MB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="12dp"
+            android:layout_toRightOf="@+id/tv_release_memory_num"
+            android:text="MB"
+            android:textSize="25sp" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_release_memory_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_release_memory_MB"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@+id/tv_release_memory_num"
+            android:text="可释放"
+            android:textSize="13sp" />
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/tv_memeory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/layout_release_memory"
+        android:layout_below="@+id/layout_release_memory"
+        android:text="消耗内存/最大内存"
+        android:textSize="15sp" />
+
+    <RelativeLayout
+        android:id="@+id/layout_meo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout_release_memory"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/material_deep_teal_500"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/iv_runningAPPs"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/running" />
+
+        <TextView
+            android:id="@+id/tv_meo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:textColor="@android:color/white"
+            android:layout_toRightOf="@+id/iv_runningAPPs"
+            android:text="运行中程序" />
+
+        <TextView
+            android:id="@+id/tv_runningAPP_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:textColor="@android:color/white"
+            android:text="" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/lv_show_process"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/layout_meo"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:divider="@color/color2"
+        android:dividerHeight="10dp" />
+
+    <Button
+        android:id="@+id/btn_clear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:background="@color/material_deep_teal_500"
+        android:textSize="20sp"
+        android:textColor="@android:color/white"
+        android:text="加速 0MB" />
+</RelativeLayout>

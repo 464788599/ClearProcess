@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/layout_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#0f8305">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="@dimen/dimen_100_dip"
+            android:layout_height="@dimen/dimen_100_dip"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/dimen_50_dip"
+            android:layout_marginTop="@dimen/dimen_50_dip"
+            android:background="@drawable/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/iv_back"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/dimen_80_dip"
+            android:layout_toRightOf="@+id/iv_back"
+            android:text="空间清理"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/dimen_60_dip" />
+    </RelativeLayout>
+
+
+
+    <com.kingdom.test.clearprocess.view.MyScrollView
+        android:id="@+id/sv_scrollView"
+        android:layout_width="match_parent"
+        android:layout_above="@+id/btn_clear"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/layout_title">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/lyout_rub_kinds"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <RelativeLayout
+                    android:id="@+id/layout_rubbish_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_below="@+id/layout_title"
+                    android:background="#0f8305">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true">
+
+                        <TextView
+                            android:id="@+id/tv_rubbishsize_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:text="0.00"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/dimen_250_dip" />
+
+                        <TextView
+                            android:id="@+id/tv_rubbishsize_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignTop="@+id/tv_rubbishsize_num"
+                            android:layout_marginLeft="@dimen/dimen_25_dip"
+                            android:layout_marginTop="@dimen/dimen_40_dip"
+                            android:layout_toRightOf="@+id/tv_rubbishsize_num"
+                            android:text="GB"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/dimen_60_dip" />
+
+                        <TextView
+                            android:id="@+id/tv_rubbishsize_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@+id/tv_rubbishsize_num"
+                            android:layout_alignLeft="@+id/tv_rubbishsize_unit"
+                            android:layout_alignStart="@+id/tv_rubbishsize_unit"
+                            android:layout_marginBottom="@dimen/dimen_50_dip"
+                            android:text="已发现"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/dimen_60_dip" />
+                    </RelativeLayout>
+                    <TextView
+                        android:singleLine="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginBottom="@dimen/dimen_10_dip"
+                        android:id="@+id/tv_scan_file"
+                        android:text="正在扫描:"
+                        android:textColor="@android:color/white"
+                        android:layout_alignParentBottom="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:background="@drawable/button_bg_select"
+                    android:id="@+id/layout_app_cache"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_app_cache"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="缓存垃圾"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+                    <ImageView
+                        android:id="@+id/iv_show6"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_app_cache"
+                        android:background="@drawable/down" />
+                    <CheckBox
+                        android:visibility="gone"
+                        android:id="@+id/cb_checkBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_30_dip" />
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/iv_complete4"
+                        android:layout_width="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_80_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/complete" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip"
+                        android:id="@+id/pb_scan3"
+                        android:layout_width="@dimen/dimen_140_dip"
+                        android:layout_height="@dimen/dimen_140_dip" />
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_app_cache_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:layout_alignParentRight="true"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <com.kingdom.test.clearprocess.view.MyListview
+                    android:id="@+id/lv_app_cache"
+                    android:layout_width="match_parent"
+                    android:divider="@null"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+
+                <RelativeLayout
+                    android:background="@drawable/button_bg_select"
+                    android:id="@+id/layout_app_data"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_appData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="软件数据"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/iv_show1"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_appData"
+                        android:background="@drawable/down" />
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/iv_complete1"
+                        android:layout_width="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_80_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/complete" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip"
+                        android:id="@+id/pb_scan"
+                        android:layout_width="@dimen/dimen_140_dip"
+                        android:layout_height="@dimen/dimen_140_dip" />
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_rubbishsize_appdata"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <com.kingdom.test.clearprocess.view.MyListview
+                    android:id="@+id/lv_app_data"
+                    android:layout_width="match_parent"
+                    android:divider="@null"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+
+
+                <RelativeLayout
+                    android:background="@drawable/button_bg_select"
+                    android:id="@+id/layout_big_folder"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_big_folder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="大文件"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/iv_show3"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_big_folder"
+                        android:background="@drawable/down" />
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/iv_complete2"
+                        android:layout_width="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_80_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/complete" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip"
+                        android:id="@+id/pb_scan1"
+                        android:layout_width="@dimen/dimen_140_dip"
+                        android:layout_height="@dimen/dimen_140_dip" />
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_rubbishsize_big_folder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <com.kingdom.test.clearprocess.view.MyListview
+                    android:id="@+id/lv_big_file"
+                    android:layout_width="match_parent"
+                    android:divider="@null"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+
+                <RelativeLayout
+                    android:background="@drawable/button_bg_select"
+                    android:id="@+id/layout_apk"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_azb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="安装包"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/iv_show5"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_azb"
+                        android:background="@drawable/down"
+                         />
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/iv_complete3"
+                        android:layout_width="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_80_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/complete" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip"
+                        android:id="@+id/pb_scan5"
+                        android:layout_width="@dimen/dimen_140_dip"
+                        android:layout_height="@dimen/dimen_140_dip" />
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_rubbishsize_apk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <com.kingdom.test.clearprocess.view.MyListview
+                    android:id="@+id/lv_apk"
+                    android:layout_width="match_parent"
+                    android:divider="@null"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+
+                <RelativeLayout
+                    android:background="@drawable/button_bg_select"
+                    android:id="@+id/layout_sys_folder"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_xtwj"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="系统文件"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/iv_complete6"
+                        android:layout_width="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_80_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/complete" />
+                    <ImageView
+                        android:id="@+id/iv_show4"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_xtwj"
+                        android:background="@drawable/down"
+                        android:visibility="visible" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip"
+                        android:id="@+id/pb_scan6"
+                        android:layout_width="@dimen/dimen_140_dip"
+                        android:layout_height="@dimen/dimen_140_dip" />
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_rubbishsize_sys_folder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:visibility="gone"
+                    android:id="@+id/layout_log_file"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_210_dip">
+                    <ImageView
+                        android:id="@+id/iv_item_elv_child_appicon"
+                        android:layout_width="@dimen/dimen_120_dip"
+                        android:layout_height="@dimen/dimen_120_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_100_dip"
+                        android:background="@mipmap/ic_launcher" />
+                    <RelativeLayout
+                        android:layout_marginLeft="@dimen/dimen_30_dip"
+                        android:layout_toRightOf="@+id/iv_item_elv_child_appicon"
+                        android:layout_toLeftOf="@+id/tv_item_elv_child_appcachs_size"
+                        android:layout_centerVertical="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:visibility="gone"
+                            android:layout_marginTop="@dimen/dimen_10_dip"
+                            android:singleLine="true"
+                            android:id="@+id/tv_item_elv_child_apkpath"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/tv_item_elv_child_appname"
+                            android:text="文件来源"
+                            android:textSize="@dimen/dimen_40_dip" />
+
+                        <TextView
+                            android:singleLine="true"
+                            android:id="@+id/tv_item_elv_child_appname"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="日志文件"
+                            android:textSize="@dimen/dimen_55_dip" />
+                    </RelativeLayout>
+
+
+                    <TextView
+                        android:id="@+id/tv_log_file_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_30_dip"
+                        android:layout_toLeftOf="@+id/cb_log_file"
+                        android:text="0.00"
+                        android:textSize="@dimen/dimen_60_dip" />
+
+                    <CheckBox
+                        android:id="@+id/cb_log_file"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_50_dip" />
+                    <ImageView
+                        android:layout_alignParentBottom="true"
+                        android:layout_width="match_parent"
+                        android:layout_marginRight="@dimen/dimen_80_dip"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_marginLeft="@dimen/dimen_80_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/layout_xzcl"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_220_dip">
+
+                    <TextView
+                        android:id="@+id/tv_xzcl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:text="卸载残留"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/dimen_60_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/iv_show2"
+                        android:layout_width="@dimen/dimen_60_dip"
+                        android:layout_height="@dimen/dimen_60_dip"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_toRightOf="@+id/tv_xzcl"
+                        android:background="@drawable/down" />
+
+                    <TextView
+                        android:id="@+id/tv_rubbishsize_xzcl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/dimen_40_dip"
+                        android:text="未发现"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/dimen_55_dip"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/dimen_1_dip"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="@dimen/dimen_60_dip"
+                        android:layout_marginRight="@dimen/dimen_60_dip"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+    </com.kingdom.test.clearprocess.view.MyScrollView>
+
+    <Button
+        android:id="@+id/btn_clear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dimen_30_dip"
+        android:layout_marginLeft="@dimen/dimen_30_dip"
+        android:layout_marginRight="@dimen/dimen_30_dip"
+        android:background="#0f8305"
+        android:text="清理垃圾"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/dimen_70_dip"></Button>
+</RelativeLayout>

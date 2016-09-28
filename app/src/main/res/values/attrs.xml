@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircularProgrssBar">
+        <attr name="CircularProgrssBarName" format="string"/>
+        <attr name="CircularProgrssBarNameSize" format="dimension"/>
+        <attr name="memorySize" format="dimension"/>
+        <attr name="percentageSize" format="dimension"/>
+        <attr name="progressBarsize" format="dimension"/>
+        <attr name="progressBarColor" format="color"/>
+    </declare-styleable>
+    <declare-styleable name="BatteryProgrssBar">
+        <attr name="BatteryProgrssBarName" format="string"/>
+        <attr name="BatteryProgrssBarNameSize" format="dimension"/>
+        <attr name="percentageSize2" format="dimension"/>
+        <attr name="progressBarColor2" format="color"/>
+    </declare-styleable>
+</resources>

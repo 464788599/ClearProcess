@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_item_elv_group_name"
+        android:text="垃圾种类"
+        android:textSize="@dimen/dimen_55_dip"
+        android:layout_marginLeft="@dimen/dimen_50_dip"
+       android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/iv_item_elv_group_show"
+        android:layout_marginLeft="@dimen/dimen_30_dip"
+        android:layout_toRightOf="@+id/tv_item_elv_group_name"
+        android:layout_centerVertical="true"
+        android:background="@drawable/down"
+        android:layout_width="@dimen/dimen_60_dip"
+        android:layout_height="@dimen/dimen_60_dip" />
+    <CheckBox
+        android:visibility="invisible"
+        android:id="@+id/cb_item_elv_group_select"
+        android:layout_marginRight="@dimen/dimen_50_dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_item_elv_group_size"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/cb_item_elv_group_select"
+        android:text="垃圾大小"
+        android:layout_marginRight="@dimen/dimen_20_dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</RelativeLayout>

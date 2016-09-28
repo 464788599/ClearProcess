@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">clearProcess</string>
+    <drawable name="clr_normal">#FFFFFF</drawable>
+    <drawable name="clr_pressed">#C1C1C1</drawable>
+</resources>
