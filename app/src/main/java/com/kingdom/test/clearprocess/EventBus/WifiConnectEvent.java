@@ -6,10 +6,16 @@ package com.kingdom.test.clearprocess.EventBus;
 public class WifiConnectEvent {
     String temp;
     String wifiName;
-    public WifiConnectEvent(String temp, String wifiName) {
+    int position;
+    public WifiConnectEvent(String temp, String wifiName, int position) {
         this.temp =temp;
         this.wifiName = wifiName;
+        this.position =position;
 
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     public String getTemp() {

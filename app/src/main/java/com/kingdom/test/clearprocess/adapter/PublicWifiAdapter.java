@@ -50,6 +50,7 @@ public class PublicWifiAdapter extends BaseAdapter {
             viewHolder.wifiName = (TextView) convertView.findViewById(R.id.tv_wifi_name);
             viewHolder.ivConnented = (ImageView) convertView.findViewById(R.id.iv_select);
             viewHolder.proConnenting = (ProgressBar) convertView.findViewById(R.id.pro_connect);
+            viewHolder.tvConnected = (TextView)convertView.findViewById(R.id.tv_connented);
             convertView.setTag(viewHolder);
         }
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
@@ -70,17 +71,27 @@ public class PublicWifiAdapter extends BaseAdapter {
         if (publicwifiInfo.get(position).isConnected()==false&&publicwifiInfo.get(position).isConnecting()==true){
             viewHolder.proConnenting.setVisibility(View.VISIBLE);
             viewHolder.ivConnented.setVisibility(View.GONE);
+            viewHolder.tvConnected.setVisibility(View.GONE);
         }
         //连接完成
         if (publicwifiInfo.get(position).isConnected()==true&&publicwifiInfo.get(position).isConnecting()==false){
             viewHolder.proConnenting.setVisibility(View.GONE);
             viewHolder.ivConnented.setVisibility(View.VISIBLE);
+            viewHolder.tvConnected.setVisibility(View.VISIBLE);
+            viewHolder.tvConnected.setText("(已连接)");
         }
 
         //没有连接
         if (publicwifiInfo.get(position).isConnected()==false&&publicwifiInfo.get(position).isConnecting()==false){
             viewHolder.proConnenting.setVisibility(View.GONE);
             viewHolder.ivConnented.setVisibility(View.GONE);
+            //如果该WIFi已经配置过
+            if (publicwifiInfo.get(position).isSave()==true){
+                viewHolder.tvConnected.setVisibility(View.VISIBLE);
+                viewHolder.tvConnected.setText("(连接过)");
+            }else {
+                viewHolder.tvConnected.setVisibility(View.GONE);
+            }
         }
         return convertView;
     }
@@ -90,5 +101,6 @@ public class PublicWifiAdapter extends BaseAdapter {
         TextView wifiName;
         ImageView ivConnented;
         ProgressBar proConnenting;
+        TextView tvConnected;
     }
 }

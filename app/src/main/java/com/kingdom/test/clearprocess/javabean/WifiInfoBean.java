@@ -10,6 +10,15 @@ public class WifiInfoBean implements Comparable<WifiInfoBean> {
     int type;
     boolean isConnecting;
     boolean isConnected;
+    boolean isSave;
+
+    public boolean isSave() {
+        return isSave;
+    }
+
+    public void setSave(boolean save) {
+        isSave = save;
+    }
 
     public boolean isConnecting() {
         return isConnecting;

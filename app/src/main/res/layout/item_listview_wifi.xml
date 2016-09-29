@@ -22,6 +22,14 @@
         android:layout_marginLeft="@dimen/dimen_100_dip"
         android:text="wifiName" />
 
+    <TextView
+        android:id="@+id/tv_connented"
+        android:layout_toRightOf="@+id/tv_wifi_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:text="(已连接)" />
+
     <ImageView
         android:visibility="gone"
         android:id="@+id/iv_select"
