@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kingdom.test.clearprocess.R;
@@ -47,6 +48,8 @@ public class PublicWifiAdapter extends BaseAdapter {
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.wifiIcon = (ImageView) convertView.findViewById(R.id.iv_wifi_icon);
             viewHolder.wifiName = (TextView) convertView.findViewById(R.id.tv_wifi_name);
+            viewHolder.ivConnented = (ImageView) convertView.findViewById(R.id.iv_select);
+            viewHolder.proConnenting = (ProgressBar) convertView.findViewById(R.id.pro_connect);
             convertView.setTag(viewHolder);
         }
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
@@ -62,11 +65,30 @@ public class PublicWifiAdapter extends BaseAdapter {
             viewHolder.wifiIcon.setImageResource(R.drawable.wifi_no_lock_3_level);
         }
         viewHolder.wifiName.setText(getItem(position).getWifiName());
+
+        //正在连接
+        if (publicwifiInfo.get(position).isConnected()==false&&publicwifiInfo.get(position).isConnecting()==true){
+            viewHolder.proConnenting.setVisibility(View.VISIBLE);
+            viewHolder.ivConnented.setVisibility(View.GONE);
+        }
+        //连接完成
+        if (publicwifiInfo.get(position).isConnected()==true&&publicwifiInfo.get(position).isConnecting()==false){
+            viewHolder.proConnenting.setVisibility(View.GONE);
+            viewHolder.ivConnented.setVisibility(View.VISIBLE);
+        }
+
+        //没有连接
+        if (publicwifiInfo.get(position).isConnected()==false&&publicwifiInfo.get(position).isConnecting()==false){
+            viewHolder.proConnenting.setVisibility(View.GONE);
+            viewHolder.ivConnented.setVisibility(View.GONE);
+        }
         return convertView;
     }
 
     class ViewHolder {
         ImageView wifiIcon;
         TextView wifiName;
+        ImageView ivConnented;
+        ProgressBar proConnenting;
     }
 }

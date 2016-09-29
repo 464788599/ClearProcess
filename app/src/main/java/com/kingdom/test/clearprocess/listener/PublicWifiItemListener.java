@@ -8,7 +8,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.kingdom.test.clearprocess.EventBus.PublicWifiConnectEvent;
+import com.kingdom.test.clearprocess.EventBus.ScanWifiEvent;
+import com.kingdom.test.clearprocess.EventBus.WifiConnectEvent;
 import com.kingdom.test.clearprocess.R;
 import com.kingdom.test.clearprocess.activity.WifiActivity;
 import com.kingdom.test.clearprocess.javabean.WifiInfoBean;
@@ -31,6 +32,10 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener {
 
     @Override
     public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
+        //发送消息通知停止刷新周围wifi的信息
+        EventBus.getDefault().post(new ScanWifiEvent("stop",true));
+
+
         View dialogView = LayoutInflater.from(wifiActivity).inflate(R.layout.public_wifi_dialog, null);
         ImageView wifiIcon = (ImageView) dialogView.findViewById(R.id.iv_public_dialog_wifi_icon);
         TextView wifiName = (TextView) dialogView.findViewById(R.id.tv_public_dialog_wifi_name);
@@ -55,17 +60,25 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+
+                //发送消息通知可以开始刷新周围wifi的信息
+                EventBus.getDefault().post(new ScanWifiEvent("start",false));
             }
         });
         yesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //点击连接之后设置连接的状态
+                publicwifiInfo.get(position).setConnecting(true);//正在连接
+                publicwifiInfo.get(position).setConnected(false);
                 //点击链接后
                 //发送消息，开始连接通知UI改变
-                EventBus.getDefault().post(new PublicWifiConnectEvent("PublicWifiInfo",publicwifiInfo.get(position),view));
+                EventBus.getDefault().post(new WifiConnectEvent("PublicWifiInfo",publicwifiInfo.get(position).getWifiName()));
                 //连接WIFi
                 connectWifi(position, publicwifiInfo, null);
                 dialog.dismiss();
+
 
 
 

@@ -24,7 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kingdom.test.clearprocess.EventBus.PublicWifiConnectEvent;
+import com.kingdom.test.clearprocess.EventBus.ScanWifiEvent;
+import com.kingdom.test.clearprocess.EventBus.WifiConnectEvent;
 import com.kingdom.test.clearprocess.R;
 import com.kingdom.test.clearprocess.adapter.PrivateWifiAdapter;
 import com.kingdom.test.clearprocess.adapter.PublicWifiAdapter;
@@ -46,8 +47,6 @@ import static android.net.ConnectivityManager.EXTRA_NO_CONNECTIVITY;
 import static android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION;
 import static android.net.wifi.WifiManager.SUPPLICANT_STATE_CHANGED_ACTION;
 import static android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION;
-import static com.kingdom.test.clearprocess.utils.WifiAdmin.WIFI_CONNECTED;
-import static com.kingdom.test.clearprocess.utils.WifiAdmin.WIFI_CONNECT_FAILED;
 
 public class WifiActivity extends AppCompatActivity implements View.OnClickListener {
     private ListView lvPrivateWifi;
@@ -84,7 +83,10 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable upDate = new Runnable() {
         @Override
         public void run() {
-            getWifis();
+            if (!isStopScanWifi) {
+                getWifis();
+            }
+
             handler.postDelayed(upDate, 3000);
 
         }
@@ -114,21 +116,10 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
                     break;
                 case CONNECTIVITY_ACTION://网络状态发生改变时，没有变化这是false，变化这是true
-                    boolean b = intent.getBooleanExtra(EXTRA_NO_CONNECTIVITY,false);
-                    Log.i("qqweqeqe",b+"");
-                    if (b==false){//网络变化，连接网络完成时(不一定连接成功)
-                        Log.i("没有发生变化",b+"");
-                        //判断网络是否连接成功
-                       int connetStated= wifiAdmin.isWifiContected(WifiActivity.this);
-                        switch (connetStated){
-                            case WIFI_CONNECTED://连接成功
-                                Log.i("是否连接成功","连接成功");
-                                break;
-                            case WIFI_CONNECT_FAILED://连接失败
-                                Log.i("是否连接成功","连接失败");
-                                break;
-                        }
-                    }else {//网络变化，正在连接网络时
+                    boolean b = intent.getBooleanExtra(EXTRA_NO_CONNECTIVITY, false);
+                    Log.i("qqweqeqe", b + "");
+                    if (b == false) {//网络变化，连接网络完成时(不一定连接成功)
+                    } else {//网络变化，正在连接网络时
 
                     }
                     break;
@@ -137,29 +128,81 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     };
     private WifiInfo mWifiInfo;
     private WifiAdmin wifiAdmin;
+    private String temp;
+    private String wifiName;
+    private boolean isStopScanWifi;
 
     private void changeWithWifiConnectState(Intent intent) {
         NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
         if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) {//网络连接断开
-
+            //断开网络初始化所有网络的连接状态
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
+                publicwifiInfo.get(i).setConnected(false);
+                publicwifiInfo.get(i).setConnecting(false);
+                publicWifiAdapter.notifyDataSetChanged();
+            }
+            for (int i = 0; i < priviatewifiInfo.size(); i++) {
+                priviatewifiInfo.get(i).setConnected(false);
+                priviatewifiInfo.get(i).setConnecting(false);
+                privateWifiAdapter.notifyDataSetChanged();
+            }
 
         } else if (info.getState().equals(NetworkInfo.State.CONNECTED)) {//已经连接网络或连接上网络
             //获取当前连接的wifi
             getCurrentWifi();
-            if (tvConnectState != null) {
-
-                tvConnectState.setVisibility(View.GONE);
-            }
-
+            if (tvConnectState != null) tvConnectState.setVisibility(View.GONE);
             layoutWifiSpeed.setVisibility(View.VISIBLE);
-            if (proConnenting != null){
-                Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-                proConnenting.setVisibility(View.GONE);
-            }
+            //点击连接网络成功后执行，设置当前连接的wifi的连接状态
+            if (temp != null) {
+                if (temp.equals("PublicWifiInfo")) {
+                    Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                    for (int i = 0; i < publicwifiInfo.size(); i++) {
+                        if (publicwifiInfo.get(i).getWifiName().equals(wifiName)) {
+                            publicwifiInfo.get(i).setConnected(true);
+                            publicwifiInfo.get(i).setConnecting(false);
+                            publicWifiAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    isStopScanWifi = false;//可以刷新WIFi
 
-            if (ivConnented != null) ivConnented.setVisibility(View.VISIBLE);
+                } else if (temp.equals("priviatewifiInfo")) {
+                    Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                    for (int i = 0; i < priviatewifiInfo.size(); i++) {
+                        if (priviatewifiInfo.get(i).getWifiName().equals(wifiName)) {
+                            priviatewifiInfo.get(i).setConnected(true);
+                            priviatewifiInfo.get(i).setConnecting(false);
+                            privateWifiAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    isStopScanWifi = false;
+                }
+            }
         } else if (info.getState().equals(NetworkInfo.State.CONNECTING)) {//网络正在连接
             tvConnectState.setText("开始连接...");
+
+            //设置当前正在连接的wifid的连接状态
+            if (temp != null) {
+                if (temp.equals("PublicWifiInfo")) {
+                    for (int i = 0; i < publicwifiInfo.size(); i++) {
+                        if (publicwifiInfo.get(i).getWifiName().equals(wifiName)) {
+                            publicwifiInfo.get(i).setConnected(false);
+                            publicwifiInfo.get(i).setConnecting(true);
+                            publicWifiAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                } else if (temp.equals("priviatewifiInfo")) {
+                    for (int i = 0; i < priviatewifiInfo.size(); i++) {
+                        if (priviatewifiInfo.get(i).getWifiName().equals(wifiName)) {
+                            priviatewifiInfo.get(i).setConnected(false);
+                            priviatewifiInfo.get(i).setConnecting(true);
+                            privateWifiAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+
+
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -206,7 +249,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         EventBus.getDefault().register(this);
         //动态注册广播
         registBroadCast();
-         wifiAdmin = new WifiAdmin(WifiActivity.this);
+        wifiAdmin = new WifiAdmin(WifiActivity.this);
         lvPrivateWifi = (ListView) findViewById(R.id.lv_private_wifi);
         lvPublicWifi = (ListView) findViewById(R.id.lv_public_wifi);
         tvWifiName = (TextView) findViewById(R.id.tv_wifi_name);
@@ -244,11 +287,26 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void getCurrentWifi() {
-        if (isOpen==true){//wifi已经打开
+        if (isOpen == true) {//wifi已经打开
             mWifiInfo = wManager.getConnectionInfo();
             String ssid = mWifiInfo.getSSID();
-            String wifiName= ssid.substring(1,ssid.length()-1);
+            String wifiName = ssid.substring(1, ssid.length() - 1);
             tvWifiName.setText(wifiName);
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
+                if (publicwifiInfo.get(i).getWifiName().equals(wifiName)) {
+                    publicwifiInfo.get(i).setConnected(true);
+                    publicwifiInfo.get(i).setConnecting(false);
+                    publicWifiAdapter.notifyDataSetChanged();
+                }
+            }
+
+            for (int i = 0; i < priviatewifiInfo.size(); i++) {
+                if (priviatewifiInfo.get(i).getWifiName().equals(wifiName)) {
+                    priviatewifiInfo.get(i).setConnected(true);
+                    priviatewifiInfo.get(i).setConnecting(false);
+                    privateWifiAdapter.notifyDataSetChanged();
+                }
+            }
         }
 
     }
@@ -303,7 +361,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         if (scanResults != null) {
             for (ScanResult result : scanResults) {
                 String wifiName = result.SSID;
-                int level =WifiManager.calculateSignalLevel(result.level,100);
+                int level = WifiManager.calculateSignalLevel(result.level, 100);
                 String capabilities = result.capabilities;//包含WPA都是需要密码
                 if (capabilities.contains("WPA") || capabilities.contains("wpa")) {
                     type = WifiAdmin.TYPE_WPA;
@@ -315,12 +373,12 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 if (type == WifiAdmin.TYPE_WPA || type == WifiAdmin.TYPE_WEP) {
                     if (priviatewifiInfo != null) {
 
-                        priviatewifiInfo.add(new WifiInfoBean(wifiName, level, type,false,false));
+                        priviatewifiInfo.add(new WifiInfoBean(wifiName, level, type));
                         privateWifiAdapter.notifyDataSetChanged();
                     }
 
                 } else if (type == WifiAdmin.TYPE_NO_PASSWD) {
-                    publicwifiInfo.add(new WifiInfoBean(wifiName, level, type,false,false));
+                    publicwifiInfo.add(new WifiInfoBean(wifiName, level, type));
                     publicWifiAdapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(this, "存在加密方式不存在的WIFi", Toast.LENGTH_SHORT).show();
@@ -362,6 +420,8 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             layoutNoWifi.setVisibility(View.GONE);
         }
 
+        getCurrentWifi();
+
     }
 
     //去除重复名字且信号更低的wifi
@@ -390,25 +450,21 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     //eventbus接受连接wifi后改变Ui的消息
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void addSize(PublicWifiConnectEvent event) {
+    public void addSize(WifiConnectEvent event) {
         switch (event.getTemp()) {
             case "PublicWifiInfo":
-                View pubView = event.getView();
-                ivConnented = (ImageView) pubView.findViewById(R.id.iv_select);
-                proConnenting = (ProgressBar) pubView.findViewById(R.id.pro_connect);
-                ivConnented.setVisibility(View.GONE);
-                proConnenting.setVisibility(View.VISIBLE);
-                tvWifiName.setText(event.getWifiInfoBean().getWifiName());
+                publicWifiAdapter.notifyDataSetChanged();
+                temp = event.getTemp();
+                wifiName = event.getWifiName();
+                tvWifiName.setText(wifiName);
                 layoutWifiSpeed.setVisibility(View.GONE);
                 tvConnectState.setVisibility(View.VISIBLE);
                 break;
             case "priviatewifiInfo":
-                View priView = event.getView();
-                ivConnented = (ImageView) priView.findViewById(R.id.iv_select);
-                proConnenting = (ProgressBar) priView.findViewById(R.id.pro_connect);
-                ivConnented.setVisibility(View.GONE);
-                proConnenting.setVisibility(View.VISIBLE);
-                tvWifiName.setText(event.getWifiInfoBean().getWifiName());
+                privateWifiAdapter.notifyDataSetChanged();
+                temp = event.getTemp();
+                wifiName = event.getWifiName();
+                tvWifiName.setText(wifiName);
                 layoutWifiSpeed.setVisibility(View.GONE);
                 tvConnectState.setVisibility(View.VISIBLE);
                 break;
@@ -416,5 +472,19 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+
+    //eventbus接受时候停止刷新（点击wifi后停止扫描WIFi，关闭对话框或成功连接后开始扫描）
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void scanWifi(ScanWifiEvent event) {
+        switch (event.getTemp()) {
+            case "stop":
+                isStopScanWifi = event.isStop();
+                break;
+            case "start":
+                isStopScanWifi = event.isStop();
+                break;
+        }
+
+    }
 
 }

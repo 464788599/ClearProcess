@@ -13,7 +13,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.kingdom.test.clearprocess.EventBus.PublicWifiConnectEvent;
+import com.kingdom.test.clearprocess.EventBus.ScanWifiEvent;
+import com.kingdom.test.clearprocess.EventBus.WifiConnectEvent;
 import com.kingdom.test.clearprocess.R;
 import com.kingdom.test.clearprocess.activity.WifiActivity;
 import com.kingdom.test.clearprocess.javabean.WifiInfoBean;
@@ -32,13 +33,16 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener 
     private boolean isShowPassward;
 
     public PriviteWifiItemListener(List<WifiInfoBean> priviatewifiInfo, WifiActivity wifiActivity) {
-        this.priviatewifiInfo=priviatewifiInfo;
-        this.wifiActivity =wifiActivity;
+        this.priviatewifiInfo = priviatewifiInfo;
+        this.wifiActivity = wifiActivity;
     }
 
 
     @Override
     public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
+        //发送消息通知停止刷新周围wifi的信息
+        EventBus.getDefault().post(new ScanWifiEvent("stop",true));
+
         View dialogView = LayoutInflater.from(wifiActivity).inflate(R.layout.private_wifi_dialog, null);
         ImageView wifiIcon = (ImageView) dialogView.findViewById(R.id.iv_private_dialog_wifi_icon);
         TextView wifiName = (TextView) dialogView.findViewById(R.id.tv_private_dialog_wifi_name);
@@ -61,8 +65,7 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener 
             wifiIcon.setImageResource(R.drawable.wifi_3_level);
         }
         wifiName.setText(priviatewifiInfo.get(position).getWifiName());
-        wifiInfo.setText("信号强度：" + (level+1)*100/4 + "%");
-
+        wifiInfo.setText("信号强度：" + (level + 1) * 100 / 4 + "%");
         showPassward.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,6 +112,8 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener 
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                //发送消息通知可以开始刷新周围wifi的信息
+                EventBus.getDefault().post(new ScanWifiEvent("start",false));
             }
         });
         yesButton.setOnClickListener(new View.OnClickListener() {
@@ -117,9 +122,11 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener 
                 String password = etPassWard.getText().toString().trim();
                 //点击链接后
                 if (password.length() >= 8) {
-
+                    //点击连接之后设置连接的状态
+                    priviatewifiInfo.get(position).setConnecting(true);//正在连接
+                    priviatewifiInfo.get(position).setConnected(false);
                     //发送消息，开始连接通知UI改变
-                    EventBus.getDefault().post(new PublicWifiConnectEvent("priviatewifiInfo",priviatewifiInfo.get(position),view));
+                    EventBus.getDefault().post(new WifiConnectEvent("priviatewifiInfo", priviatewifiInfo.get(position).getWifiName()));
                     String passward = etPassWard.getText().toString().trim();
                     connectWifi(position, priviatewifiInfo, passward);
                     dialog.dismiss();

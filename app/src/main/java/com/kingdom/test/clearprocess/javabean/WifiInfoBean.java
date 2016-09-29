@@ -27,12 +27,10 @@ public class WifiInfoBean implements Comparable<WifiInfoBean> {
         isConnected = connected;
     }
 
-    public WifiInfoBean(String wifiName, int level, int type, boolean isConnecting, boolean isConnected) {
+    public WifiInfoBean(String wifiName, int level, int type) {
         this.wifiName = wifiName;
         this.level = level;
         this.type = type;
-        this.isConnected = isConnected;
-        this.isConnecting =isConnecting;
     }
 
     public String getWifiName() {
