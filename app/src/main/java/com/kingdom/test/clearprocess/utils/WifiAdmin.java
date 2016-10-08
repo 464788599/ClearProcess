@@ -9,12 +9,16 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.List;
 
 public  class WifiAdmin {
       
-    private static final String TAG = "WifiAdmin";  
-      
+    private static final String TAG = "WifiAdmin";
+    private static final int NETWORK_WIFI_CONNECTION = 0;//代表连接的网络是WIFI
+    private static final int NETWORK_MOBILE_CONNECTION = 1;//代表连接的手机网络
+    private static final int NETWORK_DISCONNECTION =2 ;//代表没有连接网络；
+
     private WifiManager mWifiManager;
     private WifiInfo mWifiInfo;
     // 扫描出的网络连接列表  
@@ -255,4 +259,36 @@ public  class WifiAdmin {
         return (mWifiInfo == null) ? "NULL" : mWifiInfo.toString();  
     }
 
+
+    //判断是否连接网络，并获取连接的网络的类型
+    public static int getNetWorkStatus(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo networkInfo = connectivityManager
+                    .getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return NETWORK_WIFI_CONNECTION;
+                }
+                return NETWORK_MOBILE_CONNECTION;
+            }
+        }
+        return NETWORK_DISCONNECTION;
+    }
+
+
+    //判断该网络是否可以连网
+    public boolean isNetworkOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("ping -c 1 114.114.114.114");//https://www.baidu.com可以为任意网站，主要用于测试该网络时候可以连网
+            int exitValue = ipProcess.waitFor();
+            Log.i("exitValue",exitValue+"");
+            return (exitValue == 0);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }  

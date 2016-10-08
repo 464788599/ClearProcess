@@ -60,18 +60,22 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
 
     @Override
     public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
-        //发送消息通知停止刷新周围wifi的信息
-        EventBus.getDefault().post(new ScanWifiEvent("stop",true));
-//判断该WIFi时候已经配置过
-        mWifiManger = (WifiManager) wifiActivity.getSystemService(Context.WIFI_SERVICE);
-        wifiAdmin = new WifiAdmin(wifiActivity);
-        exsitsConfig = wifiAdmin.IsExsits(publicwifiInfo.get(position).getWifiName());
-        if (exsitsConfig == null) {//为空说名没有配置过
-            publicwifiInfo.get(position).setSave(false);//设置该wifi没有配置过
-            connectWifiNoConfiguration(position);
-        } else {//该wifi已经配置过
-            connectWifiConfig(position);
+
+        if (publicwifiInfo.get(position).isConnecting()==false){
+            //发送消息通知停止刷新周围wifi的信息
+            EventBus.getDefault().post(new ScanWifiEvent("stop",true));
+            //判断该WIFi时候已经配置过
+            mWifiManger = (WifiManager) wifiActivity.getSystemService(Context.WIFI_SERVICE);
+            wifiAdmin = new WifiAdmin(wifiActivity);
+            exsitsConfig = wifiAdmin.IsExsits(publicwifiInfo.get(position).getWifiName());
+            if (exsitsConfig == null) {//为空说名没有配置过
+                publicwifiInfo.get(position).setSave(false);//设置该wifi没有配置过
+                connectWifiNoConfiguration(position);
+            } else {//该wifi已经配置过
+                connectWifiConfig(position);
+            }
         }
+
     }
 
     //连接配置过的WIFi
@@ -224,6 +228,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
             case R.id.layout_see_wifi://查看网络
                 break;
             case R.id.btn_cancel://取消
+                EventBus.getDefault().post(new ScanWifiEvent("start",true));
                 popupWindow.dismiss();
                 break;
         }
@@ -241,6 +246,8 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                     publicWifiAdapter.notifyDataSetChanged();
                 }
             }
+            //断开网络后发送消息通知改变UI
+            EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi",0));
             popupWindow.dismiss();
         }
     }
@@ -259,7 +266,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                 }
             }
             //断开网络后发送消息通知改变UI
-            EventBus.getDefault().post(new WifiDisconnectEvent("privatewifi",0));
+            EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi",0));
             popupWindow.dismiss();
         }
     }

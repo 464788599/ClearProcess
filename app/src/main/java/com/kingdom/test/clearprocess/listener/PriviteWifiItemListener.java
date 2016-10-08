@@ -68,19 +68,21 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
 
     @Override
     public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
-        //发送消息通知停止刷新周围wifi的信息
-        EventBus.getDefault().post(new ScanWifiEvent("stop", true));
-
-        //判断该WIFi时候已经配置过
-        mWifiManger = (WifiManager) wifiActivity.getSystemService(Context.WIFI_SERVICE);
-        wifiAdmin = new WifiAdmin(wifiActivity);
-        exsitsConfig = wifiAdmin.IsExsits(priviatewifiInfo.get(position).getWifiName());
-        if (exsitsConfig == null) {//为空说名没有配置过
-            priviatewifiInfo.get(position).setSave(false);//设置该wifi没有配置过
-            connectWifiNoConfiguration(position);
-        } else {//该wifi已经配置过
-            connectWifiConfig(position);
+        if (priviatewifiInfo.get(position).isConnecting()==false){
+            //发送消息通知停止刷新周围wifi的信息
+            EventBus.getDefault().post(new ScanWifiEvent("stop", true));
+            //判断该WIFi时候已经配置过
+            mWifiManger = (WifiManager) wifiActivity.getSystemService(Context.WIFI_SERVICE);
+            wifiAdmin = new WifiAdmin(wifiActivity);
+            exsitsConfig = wifiAdmin.IsExsits(priviatewifiInfo.get(position).getWifiName());
+            if (exsitsConfig == null) {//为空说名没有配置过
+                priviatewifiInfo.get(position).setSave(false);//设置该wifi没有配置过
+                connectWifiNoConfiguration(position);
+            } else {//该wifi已经配置过
+                connectWifiConfig(position);
+            }
         }
+
     }
 
     //连接配置过的WIFi
@@ -249,7 +251,6 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
                     WifiAdmin wifiAdmin = new WifiAdmin(wifiActivity);
                     wifiAdmin.addNetwork(wifiAdmin.createWifiInfo(priviatewifiInfo.get(position).getWifiName(), passward, type));
                     dialog.dismiss();
-
                 }
             }
         });
@@ -276,6 +277,7 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
             case R.id.layout_see_wifi://查看网络
                 break;
             case R.id.btn_cancel://取消
+                EventBus.getDefault().post(new ScanWifiEvent("start",true));
                 popupWindow.dismiss();
                 break;
         }
@@ -293,6 +295,8 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
                     privateWifiAdapter.notifyDataSetChanged();
                 }
             }
+            //忘记网络后发送消息通知改变UI，,通知可以开始扫描周围WIFi
+            EventBus.getDefault().post(new WifiDisconnectEvent("privatewifi",0));
             popupWindow.dismiss();
         }
     }
@@ -310,7 +314,7 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
                     privateWifiAdapter.notifyDataSetChanged();
                 }
             }
-            //断开网络后发送消息通知改变UI
+            //断开网络后发送消息通知改变UI,通知可以开始扫描周围WIFi
             EventBus.getDefault().post(new WifiDisconnectEvent("privatewifi",0));
             popupWindow.dismiss();
         }
@@ -318,9 +322,6 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
 
     private void connectAction() {
         if (exsitsConfig!=null){
-            int wcgID = mWifiManger.addNetwork(exsitsConfig);
-            boolean b = mWifiManger.enableNetwork(wcgID, true);
-
             for (int i=0;i<priviatewifiInfo.size();i++){
                 if (priviatewifiInfo.get(i).getWifiName()==wifiName){
                     priviatewifiInfo.get(i).setSave(true);
@@ -334,6 +335,8 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
                     }
                 }
             }
+            int wcgID = mWifiManger.addNetwork(exsitsConfig);
+            boolean b = mWifiManger.enableNetwork(wcgID, true);
             popupWindow.dismiss();
         }
     }
