@@ -41,7 +41,6 @@ public class CircularProgrssBar extends View {
                 // TODO Auto-generated method stub
                 w = getWidth();
                 h = getHeight();
-                Log.i("FSLog", "w = " + w + " h = " + h);
                 return true;
             }
         });

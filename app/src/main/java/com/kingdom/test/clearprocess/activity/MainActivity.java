@@ -1,8 +1,6 @@
 package com.kingdom.test.clearprocess.activity;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
@@ -12,13 +10,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.kingdom.test.clearprocess.view.CircularProgrssBar;
-import com.kingdom.test.clearprocess.utils.MemoryUtils;
 import com.kingdom.test.clearprocess.R;
+import com.kingdom.test.clearprocess.utils.MemoryUtils;
+import com.kingdom.test.clearprocess.view.CircularProgrssBar;
 
 import java.io.File;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private CircularProgrssBar circularProgrssBarRAM;

@@ -5,4 +5,9 @@
     <color name="colorAccent">#FF4081</color>
     <color name="color2">#F6F6F6</color>
     <color name="con_btn_bg">#8CBBE0</color>
+    <color name="battery_bg">#21506E</color>
+    <color name="battery_bg2">#3A649C</color>
+    <color name="battery_bg3">#6485B1</color>
+    <color name="battery_bg4">#2D5994</color>
+    <color name="battery_bg5">#096584</color>
 </resources>

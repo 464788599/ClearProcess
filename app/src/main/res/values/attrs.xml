@@ -8,10 +8,16 @@
         <attr name="progressBarsize" format="dimension"/>
         <attr name="progressBarColor" format="color"/>
     </declare-styleable>
-    <declare-styleable name="BatteryProgrssBar">
-        <attr name="BatteryProgrssBarName" format="string"/>
-        <attr name="BatteryProgrssBarNameSize" format="dimension"/>
-        <attr name="percentageSize2" format="dimension"/>
-        <attr name="progressBarColor2" format="color"/>
+    <declare-styleable name="WaveProgressView">
+        <attr name="radius" format="dimension" />
+        <attr name="radius_color" format="color" />
+        <attr name="progress_text_color" format="color" />
+        <attr name="progress_text_size" format="dimension" />
+        <attr name="progress_color" format="color" />
+        <attr name="progress" format="float" />
+        <attr name="maxProgress" format="float" />
+        <attr name="annulusColor" format="color" />
+        <attr name="annulusColor2" format="color" />
     </declare-styleable>
+
 </resources>
