@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.net.wifi.ScanResult;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -46,6 +48,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,14 +91,22 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     private RelativeLayout layoutNoWifi;
     private LinearLayout layoutWifiSpeed;
     private TextView tvConnectState;
-    private List<ConfigWifiInfoBean> configWifiInfo=new ArrayList<>();
+    private List<ConfigWifiInfoBean> configWifiInfo = new ArrayList<>();
     private static final int NETWORK_WIFI_CONNECTION = 0;//代表连接的网络是WIFI
     private static final int NETWORK_MOBILE_CONNECTION = 1;//代表连接的手机网络
-    private static final int NETWORK_DISCONNECTION =2 ;//代表没有连接网络；
-    private Handler speedHandler = new Handler(){
+    private static final int NETWORK_DISCONNECTION = 2;//代表没有连接网络；
+    private Handler speedHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            Bundle bundle = (Bundle) msg.obj;
+            String downloadSpeed = bundle.getString("downloadSpeed");
+            String uploadSpeed = bundle.getString("uploadSpeed");
+            if (downloadSpeed!=null&&uploadSpeed!=null){
+                tvUploadSpeed.setText(uploadSpeed);
+                tvDownloadSpeed.setText(downloadSpeed);
+                Log.i("tawww","downloadSpeed:"+downloadSpeed+"   uploadSpeed:"+uploadSpeed);
+            }
 
         }
     };
@@ -105,7 +116,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         public void run() {
             if (!isStopScanWifi) {
                 temp = "refresh";
-                getWifis();
+                getWifiFor6();
             }
             handler.postDelayed(upDate, 3000);
 
@@ -150,6 +161,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isStopScanWifi;
     private String autoConnectwifiName;
     private long lastTotalTxBytes;
+    private boolean boo;//判断是否可以联网
 
     private void changeWithWifiConnectState(Intent intent) {
         NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
@@ -188,13 +200,13 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 //自动连接配置过的热点
-            }else if (temp.equals("configwifi")){
+            } else if (temp.equals("configwifi")) {
                 for (int i = 0; i < priviatewifiInfo.size(); i++) {
                     if (priviatewifiInfo.get(i).getWifiName().equals(autoConnectwifiName)) {
                         priviatewifiInfo.get(i).setConnected(false);
                         priviatewifiInfo.get(i).setConnecting(true);
                         privateWifiAdapter.notifyDataSetChanged();
-                    }else {
+                    } else {
                         priviatewifiInfo.get(i).setConnected(false);
                         priviatewifiInfo.get(i).setConnecting(false);
                         privateWifiAdapter.notifyDataSetChanged();
@@ -205,7 +217,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                         publicwifiInfo.get(i).setConnected(false);
                         publicwifiInfo.get(i).setConnecting(true);
                         publicWifiAdapter.notifyDataSetChanged();
-                    }else {
+                    } else {
                         publicwifiInfo.get(i).setConnected(false);
                         publicwifiInfo.get(i).setConnecting(false);
                         publicWifiAdapter.notifyDataSetChanged();
@@ -225,7 +237,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         if (temp != null) {
             //点击公共热点连接成功后
             if (temp.equals("PublicWifiInfo")) {
-                isConnectSuccess =true;
+                isConnectSuccess = true;
                 Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < publicwifiInfo.size(); i++) {
                     if (publicwifiInfo.get(i).getWifiName().equals(wifiName)) {
@@ -238,7 +250,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 isNetworkOnline();
                 //点击需要密码的热点连接成功后
             } else if (temp.equals("priviatewifiInfo")) {
-                isConnectSuccess =true;
+                isConnectSuccess = true;
                 Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < priviatewifiInfo.size(); i++) {
                     if (priviatewifiInfo.get(i).getWifiName().equals(wifiName)) {
@@ -251,8 +263,8 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 isNetworkOnline();
 
                 //自动连接配置后的WIFI连接成功后
-            }else if (temp.equals("configwifi")){
-                isConnectSuccess =true;
+            } else if (temp.equals("configwifi")) {
+                isConnectSuccess = true;
                 Toast.makeText(WifiActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < priviatewifiInfo.size(); i++) {
                     if (priviatewifiInfo.get(i).getWifiName().equals(autoConnectwifiName)) {
@@ -260,7 +272,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                         priviatewifiInfo.get(i).setConnecting(false);
                         priviatewifiInfo.get(i).setSave(true);
                         privateWifiAdapter.notifyDataSetChanged();
-                    }else {
+                    } else {
                         priviatewifiInfo.get(i).setConnected(false);
                         priviatewifiInfo.get(i).setConnecting(false);
                         privateWifiAdapter.notifyDataSetChanged();
@@ -272,7 +284,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                         publicwifiInfo.get(i).setConnecting(false);
                         publicwifiInfo.get(i).setSave(true);
                         publicWifiAdapter.notifyDataSetChanged();
-                    }else {
+                    } else {
                         publicwifiInfo.get(i).setConnected(false);
                         publicwifiInfo.get(i).setConnecting(false);
                         publicWifiAdapter.notifyDataSetChanged();
@@ -283,14 +295,13 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             setConfigWifiState();
-            //获取当前连接的wifi
-            getCurrentWifi();
+
         }
     }
 
     //判断是否可以上网
     private void isNetworkOnline() {
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
                 super.run();
@@ -306,12 +317,12 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                if(WifiAdmin.getNetWorkStatus(WifiActivity.this)!=NETWORK_DISCONNECTION&&wifiAdmin.isNetworkOnline()==true){
+                if (WifiAdmin.getNetWorkStatus(WifiActivity.this) != NETWORK_DISCONNECTION && wifiAdmin.isNetworkOnline()) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -319,7 +330,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -327,17 +338,21 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             if (tvConnectState != null) tvConnectState.setVisibility(View.GONE);
-                                layoutWifiSpeed.setVisibility(View.VISIBLE);
+                            layoutWifiSpeed.setVisibility(View.VISIBLE);
                             isStopScanWifi = false;//可以刷新WIFi
+                            //获取当前连接的wifi
+                            getCurrentWifi();
                         }
                     });
 
-                }else {
+                } else {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             tvConnectState.setText("不能上网");
                             isStopScanWifi = false;//可以刷新WIFi
+                            //获取当前连接的wifi
+                            getCurrentWifi();
                         }
                     });
 
@@ -352,7 +367,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     private void setConfigWifiState() {
         for (int i = 0; i < priviatewifiInfo.size(); i++) {
             WifiConfiguration existConfig = wifiAdmin.IsExsits(priviatewifiInfo.get(i).getWifiName());
-            if (existConfig!=null){
+            if (existConfig != null) {
                 priviatewifiInfo.get(i).setSave(true);
                 privateWifiAdapter.notifyDataSetChanged();
             }
@@ -360,7 +375,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
         for (int i = 0; i < publicwifiInfo.size(); i++) {
             WifiConfiguration existConfig = wifiAdmin.IsExsits(publicwifiInfo.get(i).getWifiName());
-            if (existConfig!=null){
+            if (existConfig != null) {
                 publicwifiInfo.get(i).setSave(true);
                 publicWifiAdapter.notifyDataSetChanged();
             }
@@ -376,10 +391,10 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             case WifiManager.WIFI_STATE_DISABLED://wif关闭了
                 handler.removeCallbacks(upDate);//停止重复扫描wifi
                 ivSwitch.setImageResource(R.drawable.switch_off);
-                isOpen = false;
                 layoutWifiList.setVisibility(View.GONE);
                 layoutWifiClose.setVisibility(View.VISIBLE);
                 tvWifiName.setText("当前没有网络连接");
+                isOpen = false;
                 break;
             case WifiManager.WIFI_STATE_ENABLED://wifi打开了
                 ivSwitch.setImageResource(R.drawable.switch_on);
@@ -388,6 +403,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 handler.postDelayed(run, 3000);//2秒后执行确保扫描完整
                 break;
             case WifiManager.WIFI_STATE_ENABLING://wifi正在打开
+                Log.i("tadawwww", "wifi正在打开");
                 alertDialog = new AlertDialog.Builder(context).create();
                 View view = LayoutInflater.from(context).inflate(R.layout.openning_wifi, null);
                 alertDialog.setView(view);
@@ -446,38 +462,44 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     private long lastTotalRxBytes = 0;
     private long lastTimeStamp = 0;
+
     //获取下载速度和上传速度
     private void getDownloadSpeedAndUploadSpeed() {
         //获取现在总的接收到的数据
-        lastTotalRxBytes = TrafficStats.getTotalRxBytes()/1024;//总的接收到的数据
-        lastTotalTxBytes = TrafficStats.getTotalTxBytes()/1024;//总的传输的数据
+        lastTotalRxBytes = TrafficStats.getTotalRxBytes();//总的接收到的数据
+        lastTotalTxBytes = TrafficStats.getTotalTxBytes();//总的传输的数据
         lastTimeStamp = System.currentTimeMillis();
-        Log.i("就大阿达啊","nowTotalRxBytes:"+lastTotalRxBytes+"  lastTimeStamp:"+lastTimeStamp);
-        new Timer().schedule(task,1000,2000);
+        Log.i("就大阿达啊", "nowTotalRxBytes:" + lastTotalRxBytes + "  lastTimeStamp:" + lastTimeStamp);
+        new Timer().schedule(task, 1000, 1000);
 
     }
+
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
             showNetSpeed();
         }
     };
+
     private void showNetSpeed() {
-        long nowTotalRxBytes = TrafficStats.getTotalRxBytes()/1024;
-        long nowTotalTxBytes = TrafficStats.getTotalTxBytes()/1024;
+        long nowTotalRxBytes = TrafficStats.getTotalRxBytes();
+        long nowTotalTxBytes = TrafficStats.getTotalTxBytes();
+
         long nowTimeStamp = System.currentTimeMillis();
-        long downloadSpeed = (nowTotalRxBytes-lastTotalRxBytes)/((nowTimeStamp-lastTimeStamp)/1000);
-        long uploadSpeed = (nowTotalTxBytes-lastTotalTxBytes)/((nowTimeStamp-lastTimeStamp)/1000);
+        String downloadSpeed = transform((nowTotalRxBytes - lastTotalRxBytes), (nowTimeStamp - lastTimeStamp));
+        String uploadSpeed = transform((nowTotalTxBytes - lastTotalTxBytes), (nowTimeStamp - lastTimeStamp));
 
-        lastTotalRxBytes=nowTotalRxBytes;
-        lastTotalTxBytes=nowTotalTxBytes;
-        lastTimeStamp=nowTimeStamp;
-        Log.i("网速","downloadSpeed:"+String.valueOf(downloadSpeed)+"kB/s"+"  uploadSpeed:"+String.valueOf(uploadSpeed)+"kB/s");
-//        Message msg = speedHandler.obtainMessage();
-//        Bundle bundle = new Bundle();
-//        bundle
-
+        lastTotalRxBytes = nowTotalRxBytes;
+        lastTotalTxBytes = nowTotalTxBytes;
+        lastTimeStamp = nowTimeStamp;
+        Message msg = speedHandler.obtainMessage();
+        Bundle bundle = new Bundle();
+        bundle.putString("downloadSpeed", downloadSpeed);
+        bundle.putString("uploadSpeed", uploadSpeed);
+        msg.obj = bundle;
+        speedHandler.sendMessage(msg);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -491,12 +513,13 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             int netWorkId = mWifiInfo.getNetworkId();
             int speed = mWifiInfo.getLinkSpeed();
             int rssi = mWifiInfo.getRssi();
-            String bssid=mWifiInfo.getBSSID();
-            Log.i("当前连接的网络","netWorkId:"+netWorkId+" speed:"+speed+"  rssi:"+rssi+"  bssid:"+bssid);
-            if (netWorkId==-1&&speed==-1&&rssi==-200&&bssid.equals("00:00:00:00:00:00")){
+            String bssid = mWifiInfo.getBSSID();
+            String ssid = mWifiInfo.getSSID();
+            String wifiName = ssid.substring(1, ssid.length() - 1);
+            if (TextUtils.isEmpty(wifiName)) {
                 tvWifiName.setText("当前没有网络连接");
-                isStopScanWifi=true;
-                new Thread(){
+                isStopScanWifi = true;
+                new Thread() {
                     @Override
                     public void run() {
                         super.run();
@@ -515,9 +538,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }.start();
 
-            }else {
-                String ssid = mWifiInfo.getSSID();
-                String wifiName = ssid.substring(1, ssid.length() - 1);
+            } else {
                 tvWifiName.setText(wifiName);
                 for (int i = 0; i < publicwifiInfo.size(); i++) {
                     if (publicwifiInfo.get(i).getWifiName().equals(wifiName)) {
@@ -534,12 +555,12 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 //实时判断连接的网络是否可以联网(重复刷新wifi时)
-                if (temp.equals("refresh")){
-                    new Thread(){
+                if (temp.equals("refresh")) {
+                    new Thread() {
                         @Override
                         public void run() {
                             super.run();
-                            if(WifiAdmin.getNetWorkStatus(WifiActivity.this)!=NETWORK_DISCONNECTION&&wifiAdmin.isNetworkOnline()==true){
+                            if (WifiAdmin.getNetWorkStatus(WifiActivity.this) != NETWORK_DISCONNECTION && wifiAdmin.isNetworkOnline() == true) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -547,7 +568,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                                         layoutWifiSpeed.setVisibility(View.VISIBLE);
                                     }
                                 });
-                            }else {
+                            } else {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -559,28 +580,25 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     }.start();
-
                 }
             }
-
         }
-
     }
 
     //在打开网络的情况下且没有连接网络如果存在已经配置好的WIFi则自动连接其中信号最好的Wifi
     private void autoConnectConfigurationWifi() {
-        if (isOpen){
+        if (isOpen) {
             configWifiInfo.clear();
             //获取已经配置的WIFi
-            configWifiInfo=getConfigWifi();
-            Log.i("configWifiInfo",configWifiInfo.size()+"");
+            configWifiInfo = getConfigWifi();
+            Log.i("configWifiInfo", configWifiInfo.size() + "");
             int maxLevel = getMaxLevelInConfigWifi();
-            for (int i =0;i<configWifiInfo.size();i++){
-                if (configWifiInfo.get(i).getLevel()==maxLevel){
+            for (int i = 0; i < configWifiInfo.size(); i++) {
+                if (configWifiInfo.get(i).getLevel() == maxLevel) {
                     temp = "configwifi";
                     int wcgID = wManager.addNetwork(configWifiInfo.get(i).getExistConfig());
                     boolean b = wManager.enableNetwork(wcgID, true);
-                    autoConnectwifiName = configWifiInfo.get(i).getExistConfig().SSID.substring(1,configWifiInfo.get(i).getExistConfig().SSID.length()-1);
+                    autoConnectwifiName = configWifiInfo.get(i).getExistConfig().SSID.substring(1, configWifiInfo.get(i).getExistConfig().SSID.length() - 1);
                     tvWifiName.setText(autoConnectwifiName);
                     layoutWifiSpeed.setVisibility(View.GONE);
                     tvConnectState.setVisibility(View.VISIBLE);
@@ -594,11 +612,11 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     //从配置好的wifi集合中获取到信号等级最高的配置wifi的下标
     private int getMaxLevelInConfigWifi() {
-        int maxLevel =0;
-        for (int i=0;i<configWifiInfo.size();i++){
-           if (configWifiInfo.get(i).getLevel()>=maxLevel){
-               maxLevel = configWifiInfo.get(i).getLevel();
-           }
+        int maxLevel = 0;
+        for (int i = 0; i < configWifiInfo.size(); i++) {
+            if (configWifiInfo.get(i).getLevel() >= maxLevel) {
+                maxLevel = configWifiInfo.get(i).getLevel();
+            }
         }
         return maxLevel;
     }
@@ -607,15 +625,15 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     private List<ConfigWifiInfoBean> getConfigWifi() {
         for (int i = 0; i < priviatewifiInfo.size(); i++) {
             WifiConfiguration existConfig = wifiAdmin.IsExsits(priviatewifiInfo.get(i).getWifiName());
-            if (existConfig!=null){
-                configWifiInfo.add(new ConfigWifiInfoBean(existConfig,priviatewifiInfo.get(i).getLevel()));
+            if (existConfig != null) {
+                configWifiInfo.add(new ConfigWifiInfoBean(existConfig, priviatewifiInfo.get(i).getLevel()));
             }
         }
 
         for (int i = 0; i < publicwifiInfo.size(); i++) {
             WifiConfiguration existConfig = wifiAdmin.IsExsits(publicwifiInfo.get(i).getWifiName());
-            if (existConfig!=null){
-                configWifiInfo.add(new ConfigWifiInfoBean(existConfig,publicwifiInfo.get(i).getLevel()));
+            if (existConfig != null) {
+                configWifiInfo.add(new ConfigWifiInfoBean(existConfig, publicwifiInfo.get(i).getLevel()));
             }
         }
         return configWifiInfo;
@@ -623,10 +641,10 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setListviewItemListener() {
         //需要密码的wifi设置点击事件
-        lvPrivateWifi.setOnItemClickListener(new PriviteWifiItemListener(priviatewifiInfo, WifiActivity.this,privateWifiAdapter));
+        lvPrivateWifi.setOnItemClickListener(new PriviteWifiItemListener(priviatewifiInfo, WifiActivity.this, privateWifiAdapter));
 
         //公共wifi设置点击事件
-        lvPublicWifi.setOnItemClickListener(new PublicWifiItemListener(publicwifiInfo, WifiActivity.this,publicWifiAdapter));
+        lvPublicWifi.setOnItemClickListener(new PublicWifiItemListener(publicwifiInfo, WifiActivity.this, publicWifiAdapter));
 
     }
 
@@ -650,10 +668,16 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_open_wifi:
                 wManager.setWifiEnabled(true);
+                isOpen = true;
                 break;
             case R.id.iv_switch:
                 if (isOpen) {
                     wManager.setWifiEnabled(false);
+                    handler.removeCallbacks(upDate);//停止重复扫描wifi
+                    ivSwitch.setImageResource(R.drawable.switch_off);
+                    layoutWifiList.setVisibility(View.GONE);
+                    layoutWifiClose.setVisibility(View.VISIBLE);
+                    tvWifiName.setText("当前没有网络连接");
                     isOpen = false;
                 } else {
                     wManager.setWifiEnabled(true);
@@ -668,85 +692,77 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         priviatewifiInfo.clear();
         publicwifiInfo.clear();
         wManager.startScan();
-        if (Build.VERSION.SDK_INT >= 23) {
-            ActivityCompat.requestPermissions(WifiActivity.this,
-                    new String[]{Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE},124);
-        }else {
-            List<ScanResult> scanResults = wManager.getScanResults();
-            if (scanResults != null) {
-                for (ScanResult result : scanResults) {
-                    String wifiName = result.SSID;
-                    int level = WifiManager.calculateSignalLevel(result.level, 100);
-                    String capabilities = result.capabilities;//包含WPA都是需要密码
-                    if (capabilities.contains("WPA") || capabilities.contains("wpa")) {
-                        type = WifiAdmin.TYPE_WPA;
-                    } else if (capabilities.contains("WEP") || capabilities.contains("wep")) {
-                        type = WifiAdmin.TYPE_WEP;
-                    } else {
-                        type = WifiAdmin.TYPE_NO_PASSWD;
+        List<ScanResult> scanResults = wManager.getScanResults();
+        if (scanResults != null) {
+            for (ScanResult result : scanResults) {
+                String wifiName = result.SSID;
+                int level = WifiManager.calculateSignalLevel(result.level, 4);
+                String capabilities = result.capabilities;//包含WPA都是需要密码
+                if (capabilities.contains("WPA") || capabilities.contains("wpa")) {
+                    type = WifiAdmin.TYPE_WPA;
+                } else if (capabilities.contains("WEP") || capabilities.contains("wep")) {
+                    type = WifiAdmin.TYPE_WEP;
+                } else {
+                    type = WifiAdmin.TYPE_NO_PASSWD;
+                }
+                if (type == WifiAdmin.TYPE_WPA || type == WifiAdmin.TYPE_WEP) {
+                    if (priviatewifiInfo != null && !TextUtils.isEmpty(wifiName)) {
+
+                        priviatewifiInfo.add(new WifiInfoBean(wifiName, level, type));
+                        privateWifiAdapter.notifyDataSetChanged();
                     }
-                    if (type == WifiAdmin.TYPE_WPA || type == WifiAdmin.TYPE_WEP) {
-                        if (priviatewifiInfo != null&& !TextUtils.isEmpty(wifiName)) {
 
-                            priviatewifiInfo.add(new WifiInfoBean(wifiName, level, type));
-                            privateWifiAdapter.notifyDataSetChanged();
-                        }
-
-                    } else if (type == WifiAdmin.TYPE_NO_PASSWD) {
-                        if (priviatewifiInfo != null&& !TextUtils.isEmpty(wifiName)) {
-                            publicwifiInfo.add(new WifiInfoBean(wifiName, level, type));
-                            publicWifiAdapter.notifyDataSetChanged();
-                        }
-
-                    } else {
-                        Toast.makeText(this, "存在加密方式不存在的WIFi", Toast.LENGTH_SHORT).show();
+                } else if (type == WifiAdmin.TYPE_NO_PASSWD) {
+                    if (priviatewifiInfo != null && !TextUtils.isEmpty(wifiName)) {
+                        publicwifiInfo.add(new WifiInfoBean(wifiName, level, type));
+                        publicWifiAdapter.notifyDataSetChanged();
                     }
+
+                } else {
+                    Toast.makeText(this, "存在加密方式不存在的WIFi", Toast.LENGTH_SHORT).show();
                 }
             }
-
-            //如果没有需要密码的WIFi时
-            if (priviatewifiInfo.size() <= 0) {
-                layoutPrivateWifi.setVisibility(View.GONE);
-                ivLine.setVisibility(View.GONE);
-            } else {
-                layoutPrivateWifi.setVisibility(View.VISIBLE);
-                ivLine.setVisibility(View.VISIBLE);
-                priviatewifiInfo = removeTheSameNameWifi(priviatewifiInfo);
-                Collections.sort(priviatewifiInfo);
-                Collections.reverse(priviatewifiInfo);
-                privateWifiAdapter.notifyDataSetChanged();
-            }
-
-            //如果没有公共WIFi时
-            if (publicwifiInfo.size() <= 0) {
-                layoutPublicWifi.setVisibility(View.GONE);
-                ivLine.setVisibility(View.GONE);
-            } else {
-                layoutPublicWifi.setVisibility(View.VISIBLE);
-                publicwifiInfo = removeTheSameNameWifi(publicwifiInfo);
-                Collections.sort(publicwifiInfo);
-                Collections.reverse(publicwifiInfo);
-                publicWifiAdapter.notifyDataSetChanged();
-
-            }
-
-            //如果需要密码的WIFi和公共WIFI都没有时
-            if (priviatewifiInfo.size() <= 0 && publicwifiInfo.size() <= 0) {
-                layoutWifiList.setVisibility(View.GONE);
-                layoutNoWifi.setVisibility(View.VISIBLE);
-            } else {
-                layoutWifiList.setVisibility(View.VISIBLE);
-                layoutNoWifi.setVisibility(View.GONE);
-            }
-
-            getCurrentWifi();
-            setConfigWifiState();
         }
 
+        //如果没有需要密码的WIFi时
+        if (priviatewifiInfo.size() <= 0) {
+            layoutPrivateWifi.setVisibility(View.GONE);
+            ivLine.setVisibility(View.GONE);
+        } else {
+            layoutPrivateWifi.setVisibility(View.VISIBLE);
+            ivLine.setVisibility(View.VISIBLE);
+            priviatewifiInfo = removeTheSameNameWifi(priviatewifiInfo);
+            Collections.sort(priviatewifiInfo);
+            Collections.reverse(priviatewifiInfo);
+            privateWifiAdapter.notifyDataSetChanged();
+        }
 
+        //如果没有公共WIFi时
+        if (publicwifiInfo.size() <= 0) {
+            layoutPublicWifi.setVisibility(View.GONE);
+            ivLine.setVisibility(View.GONE);
+        } else {
+            layoutPublicWifi.setVisibility(View.VISIBLE);
+            publicwifiInfo = removeTheSameNameWifi(publicwifiInfo);
+            Collections.sort(publicwifiInfo);
+            Collections.reverse(publicwifiInfo);
+            publicWifiAdapter.notifyDataSetChanged();
 
+        }
 
+        //如果需要密码的WIFi和公共WIFI都没有时
+        if (priviatewifiInfo.size() <= 0 && publicwifiInfo.size() <= 0) {
+            layoutWifiList.setVisibility(View.GONE);
+            layoutNoWifi.setVisibility(View.VISIBLE);
+        } else {
+            layoutWifiList.setVisibility(View.VISIBLE);
+            layoutNoWifi.setVisibility(View.GONE);
+        }
+
+        getCurrentWifi();
+        setConfigWifiState();
     }
+
 
     //去除重复名字且信号更低的wifi
     public List<WifiInfoBean> removeTheSameNameWifi(List<WifiInfoBean> list) {
@@ -777,7 +793,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
         switch (event.getTemp()) {
             case "PublicWifiInfo":
                 //初始化其他WIFi的连接状态，设置点击的wifi的连接状态
-                setConnectState(event.getPosition(),event.getTemp());
+                setConnectState(event.getPosition(), event.getTemp());
                 publicWifiAdapter.notifyDataSetChanged();
                 temp = event.getTemp();
                 wifiName = event.getWifiName();
@@ -790,7 +806,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case "priviatewifiInfo":
                 //初始化其他WIFi的连接状态，设置点击的wifi的连接状态
-                setConnectState(event.getPosition(),event.getTemp());
+                setConnectState(event.getPosition(), event.getTemp());
                 privateWifiAdapter.notifyDataSetChanged();
                 temp = event.getTemp();
                 wifiName = event.getWifiName();
@@ -806,17 +822,17 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
 
     ////初始化其他WIFi的连接状态，设置点击的wifi的连接状态
     private void setConnectState(int position, String temp) {
-        if (temp.equals("PublicWifiInfo")){
-            for (int i = 0;i<priviatewifiInfo.size();i++){
+        if (temp.equals("PublicWifiInfo")) {
+            for (int i = 0; i < priviatewifiInfo.size(); i++) {
                 priviatewifiInfo.get(i).setConnected(false);
                 priviatewifiInfo.get(i).setConnecting(false);
                 privateWifiAdapter.notifyDataSetChanged();
             }
-            for (int i=0;i<publicwifiInfo.size();i++){
-                if (i==position){
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
+                if (i == position) {
                     publicwifiInfo.get(i).setConnected(false);
                     publicwifiInfo.get(i).setConnecting(true);
-                }else {
+                } else {
                     publicwifiInfo.get(i).setConnected(false);
                     publicwifiInfo.get(i).setConnecting(false);
                 }
@@ -824,19 +840,18 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
             }
 
 
-
         }
-        if (temp.equals("priviatewifiInfo")){
-            for (int i = 0;i<publicwifiInfo.size();i++){
+        if (temp.equals("priviatewifiInfo")) {
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
                 publicwifiInfo.get(i).setConnected(false);
                 publicwifiInfo.get(i).setConnecting(false);
                 publicWifiAdapter.notifyDataSetChanged();
             }
-            for (int i=0;i<priviatewifiInfo.size();i++){
-                if (i==position){
+            for (int i = 0; i < priviatewifiInfo.size(); i++) {
+                if (i == position) {
                     priviatewifiInfo.get(i).setConnected(false);
                     priviatewifiInfo.get(i).setConnecting(true);
-                }else {
+                } else {
                     priviatewifiInfo.get(i).setConnected(false);
                     priviatewifiInfo.get(i).setConnecting(false);
                 }
@@ -867,13 +882,13 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     public void WifiDisConnect(WifiDisconnectEvent event) {
         switch (event.getTemp()) {
             case "privatewifi":
-                if (event.getI()==0){
+                if (event.getI() == 0) {
                     tvWifiName.setText("当前没有网络连接");
                 }
-                isStopScanWifi=false;
+                isStopScanWifi = false;
                 break;
             case "publicWifi":
-                if (event.getI()==0){
+                if (event.getI() == 0) {
                     tvWifiName.setText("当前没有网络连接");
                 }
                 isStopScanWifi = false;
@@ -886,17 +901,18 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
     //开始计时
     private Timer timer = null;
     private boolean isConnectSuccess;
-    public  void startTimer(final String wifiName){
-        if (timer!=null){
+
+    public void startTimer(final String wifiName) {
+        if (timer != null) {
             stopTimer();
         }
-       isConnectSuccess=false;
+        isConnectSuccess = false;
         timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 //在20s内没有连接成功则连接失败，断开连接
-                if (!isConnectSuccess){
+                if (!isConnectSuccess) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -910,7 +926,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                             for (int i = 0; i < publicwifiInfo.size(); i++) {
                                 publicwifiInfo.get(i).setConnected(false);
                                 publicwifiInfo.get(i).setConnecting(false);
-                                if (publicwifiInfo.get(i).getWifiName()==wifiName){
+                                if (publicwifiInfo.get(i).getWifiName() == wifiName) {
                                     WifiConfiguration tempConfig = wifiAdmin.IsExsits(wifiName);
                                     if (tempConfig != null) {
                                         wManager.removeNetwork(tempConfig.networkId);
@@ -921,7 +937,7 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                             for (int i = 0; i < priviatewifiInfo.size(); i++) {
                                 priviatewifiInfo.get(i).setConnected(false);
                                 priviatewifiInfo.get(i).setConnecting(false);
-                                if (priviatewifiInfo.get(i).getWifiName()==wifiName){
+                                if (priviatewifiInfo.get(i).getWifiName() == wifiName) {
                                     WifiConfiguration tempConfig = wifiAdmin.IsExsits(wifiName);
                                     if (tempConfig != null) {
                                         wManager.removeNetwork(tempConfig.networkId);
@@ -929,97 +945,71 @@ public class WifiActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                                 privateWifiAdapter.notifyDataSetChanged();
                             }
-                            isStopScanWifi=false;
+                            isStopScanWifi = false;
                             tvConnectState.setVisibility(View.GONE);
                             tvWifiName.setText("当前没有网络连接");
-                            Toast.makeText(WifiActivity.this,"连接失败，请重新连接",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(WifiActivity.this, "连接失败，请重新连接", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
             }
-        },20*1000);
+        }, 20 * 1000);
     }
 
     //停止计时
     private void stopTimer() {
-        if (timer!=null){
+        if (timer != null) {
             timer.cancel();
-            timer=null;
+            timer = null;
         }
     }
 
 
-    public void onRequestPermissionsResult(final int requestCode, String[] permissions, final int[] grantResults) {
-        if (requestCode==124){
-            List<ScanResult> scanResults = wManager.getScanResults();
-            if (scanResults != null) {
-                for (ScanResult result : scanResults) {
-                    String wifiName = result.SSID;
-                    int level = WifiManager.calculateSignalLevel(result.level, 100);
-                    String capabilities = result.capabilities;//包含WPA都是需要密码
-                    if (capabilities.contains("WPA") || capabilities.contains("wpa")) {
-                        type = WifiAdmin.TYPE_WPA;
-                    } else if (capabilities.contains("WEP") || capabilities.contains("wep")) {
-                        type = WifiAdmin.TYPE_WEP;
-                    } else {
-                        type = WifiAdmin.TYPE_NO_PASSWD;
-                    }
-                    if (type == WifiAdmin.TYPE_WPA || type == WifiAdmin.TYPE_WEP) {
-                        if (priviatewifiInfo != null&& !TextUtils.isEmpty(wifiName)) {
-
-                            priviatewifiInfo.add(new WifiInfoBean(wifiName, level, type));
-                            privateWifiAdapter.notifyDataSetChanged();
-                        }
-
-                    } else if (type == WifiAdmin.TYPE_NO_PASSWD) {
-                        if (priviatewifiInfo != null&& !TextUtils.isEmpty(wifiName)) {
-                            publicwifiInfo.add(new WifiInfoBean(wifiName, level, type));
-                            publicWifiAdapter.notifyDataSetChanged();
-                        }
-
-                    } else {
-                        Toast.makeText(this, "存在加密方式不存在的WIFi", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            //如果没有需要密码的WIFi时
-            if (priviatewifiInfo.size() <= 0) {
-                layoutPrivateWifi.setVisibility(View.GONE);
-                ivLine.setVisibility(View.GONE);
+    //判断是否是6.0
+    private void getWifiFor6() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkLocationPermission1 = ContextCompat.checkSelfPermission(WifiActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
+            int checkLocationPermission2 = ContextCompat.checkSelfPermission(WifiActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
+            if (checkLocationPermission1 == PackageManager.PERMISSION_GRANTED && checkLocationPermission2 == PackageManager.PERMISSION_GRANTED) {
+                getWifis();
             } else {
-                layoutPrivateWifi.setVisibility(View.VISIBLE);
-                ivLine.setVisibility(View.VISIBLE);
-                priviatewifiInfo = removeTheSameNameWifi(priviatewifiInfo);
-                Collections.sort(priviatewifiInfo);
-                Collections.reverse(priviatewifiInfo);
-                privateWifiAdapter.notifyDataSetChanged();
+                ActivityCompat.requestPermissions(WifiActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+                return;
             }
-
-            //如果没有公共WIFi时
-            if (publicwifiInfo.size() <= 0) {
-                layoutPublicWifi.setVisibility(View.GONE);
-                ivLine.setVisibility(View.GONE);
-            } else {
-                layoutPublicWifi.setVisibility(View.VISIBLE);
-                publicwifiInfo = removeTheSameNameWifi(publicwifiInfo);
-                Collections.sort(publicwifiInfo);
-                Collections.reverse(publicwifiInfo);
-                publicWifiAdapter.notifyDataSetChanged();
-
-            }
-
-            //如果需要密码的WIFi和公共WIFI都没有时
-            if (priviatewifiInfo.size() <= 0 && publicwifiInfo.size() <= 0) {
-                layoutWifiList.setVisibility(View.GONE);
-                layoutNoWifi.setVisibility(View.VISIBLE);
-            } else {
-                layoutWifiList.setVisibility(View.VISIBLE);
-                layoutNoWifi.setVisibility(View.GONE);
-            }
-
-            getCurrentWifi();
-            setConfigWifiState();
+        } else {
+            getWifis();
         }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 100:
+                getWifis();
+                break;
+        }
+    }
+
+    //将B转化为KB，MB
+    public String transform(long bytes, long time) {
+        String speed = null;
+        if (bytes < 1024 && bytes > 0) {//既小于1Kb
+            speed = String.valueOf(bytes*1000/time) + "B/s";
+        } else if (bytes > 1024 && bytes < 1024 * 1024) {//大于1Kb小于1M
+            float d =  ((float)bytes/1024) /(time/1000);
+            DecimalFormat df = new DecimalFormat("0.00");//格式化小数，不足的补0
+            String filesize = df.format(d);//返回的是String类型的
+            speed = filesize + "KB/s";
+        } else if (bytes > 1024 * 1024) {
+            float d = ((float)bytes/(1024*1024))/(time/1000);
+            DecimalFormat df = new DecimalFormat("0.00");//格式化小数，不足的补0
+            String filesize = df.format(d);//返回的是String类型的
+            speed = filesize + "MB/s";
+        }
+
+        return speed;
     }
 }
+

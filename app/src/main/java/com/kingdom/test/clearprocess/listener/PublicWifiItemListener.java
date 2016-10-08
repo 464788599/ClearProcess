@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kingdom.test.clearprocess.EventBus.ScanWifiEvent;
 import com.kingdom.test.clearprocess.EventBus.WifiConnectEvent;
@@ -35,7 +36,7 @@ import java.util.List;
 /**
  * Created by admin on 2016/9/28.
  */
-public class PublicWifiItemListener implements AdapterView.OnItemClickListener,View.OnClickListener {
+public class PublicWifiItemListener implements AdapterView.OnItemClickListener, View.OnClickListener {
     List<WifiInfoBean> publicwifiInfo;
     WifiActivity wifiActivity;
     private WifiManager mWifiManger;
@@ -52,18 +53,19 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
     private Button btnCancel;
     private String wifiName;
     PublicWifiAdapter publicWifiAdapter;
+
     public PublicWifiItemListener(List<WifiInfoBean> publicwifiInfo, WifiActivity wifiActivity, PublicWifiAdapter publicWifiAdapter) {
-        this.publicwifiInfo=publicwifiInfo;
-        this.wifiActivity =wifiActivity;
-        this.publicWifiAdapter =publicWifiAdapter;
+        this.publicwifiInfo = publicwifiInfo;
+        this.wifiActivity = wifiActivity;
+        this.publicWifiAdapter = publicWifiAdapter;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
 
-        if (publicwifiInfo.get(position).isConnecting()==false){
+        if (publicwifiInfo.get(position).isConnecting() == false) {
             //发送消息通知停止刷新周围wifi的信息
-            EventBus.getDefault().post(new ScanWifiEvent("stop",true));
+            EventBus.getDefault().post(new ScanWifiEvent("stop", true));
             //判断该WIFi时候已经配置过
             mWifiManger = (WifiManager) wifiActivity.getSystemService(Context.WIFI_SERVICE);
             wifiAdmin = new WifiAdmin(wifiActivity);
@@ -153,7 +155,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
             wifiIcon.setImageResource(R.drawable.wifi_no_lock_3_level);
         }
         wifiName.setText(publicwifiInfo.get(position).getWifiName());
-        wifiInfo.setText("信号强度：" + (level+1)*100/4 + "%");
+        wifiInfo.setText("信号强度：" + (level + 1) * 100 / 4 + "%");
         final AlertDialog dialog = new AlertDialog.Builder(wifiActivity).setView(dialogView).show();
         noButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,7 +163,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                 dialog.dismiss();
 
                 //发送消息通知可以开始刷新周围wifi的信息
-                EventBus.getDefault().post(new ScanWifiEvent("start",false));
+                EventBus.getDefault().post(new ScanWifiEvent("start", false));
             }
         });
         yesButton.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +175,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                 publicwifiInfo.get(position).setConnected(false);
                 //点击链接后
                 //发送消息，开始连接通知UI改变
-                EventBus.getDefault().post(new WifiConnectEvent("PublicWifiInfo",publicwifiInfo.get(position).getWifiName(), position));
+                EventBus.getDefault().post(new WifiConnectEvent("PublicWifiInfo", publicwifiInfo.get(position).getWifiName(), position));
                 //连接WIFi
                 int type = publicwifiInfo.get(position).getType();
                 WifiAdmin wifiAdmin = new WifiAdmin(wifiActivity);
@@ -182,6 +184,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
             }
         });
     }
+
     //设置POPWindow
     private void setPopWindow(View popview) {
         popupWindow = new PopupWindow(popview, ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
@@ -228,7 +231,7 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
             case R.id.layout_see_wifi://查看网络
                 break;
             case R.id.btn_cancel://取消
-                EventBus.getDefault().post(new ScanWifiEvent("start",true));
+                EventBus.getDefault().post(new ScanWifiEvent("start", true));
                 popupWindow.dismiss();
                 break;
         }
@@ -236,29 +239,33 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
     }
 
     private void forgetWifi() {
-        if (exsitsConfig!=null){
-            mWifiManger.removeNetwork(exsitsConfig.networkId);
-            for (int i=0;i<publicwifiInfo.size();i++){
-                if (publicwifiInfo.get(i).getWifiName()==wifiName){
-                    publicwifiInfo.get(i).setSave(false);
-                    publicwifiInfo.get(i).setConnected(false);
-                    publicwifiInfo.get(i).setConnecting(false);
-                    publicWifiAdapter.notifyDataSetChanged();
+        if (exsitsConfig != null) {
+            boolean boo = wifiAdmin.isConfigurationInThisAPP(exsitsConfig.networkId);
+            if (boo) {
+                for (int i = 0; i < publicwifiInfo.size(); i++) {
+                    if (publicwifiInfo.get(i).getWifiName() == wifiName) {
+                        publicwifiInfo.get(i).setSave(false);
+                        publicwifiInfo.get(i).setConnected(false);
+                        publicwifiInfo.get(i).setConnecting(false);
+                        publicWifiAdapter.notifyDataSetChanged();
+                    }
                 }
+                //断开网络后发送消息通知改变UI
+                EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi", 0));
+                popupWindow.dismiss();
+            } else {
+                Toast.makeText(wifiActivity,"android6.0以上不能修改其他应用程序配置的WIFI，请到系统设置中修改",Toast.LENGTH_SHORT).show();
             }
-            //断开网络后发送消息通知改变UI
-            EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi",0));
-            popupWindow.dismiss();
         }
     }
 
     private void disconnectAction() {
-        if (exsitsConfig!=null){
-            int netId =exsitsConfig.networkId;
+        if (exsitsConfig != null) {
+            int netId = exsitsConfig.networkId;
             mWifiManger.disableNetwork(netId);
             mWifiManger.disconnect();
-            for (int i=0;i<publicwifiInfo.size();i++){
-                if (publicwifiInfo.get(i).getWifiName()==wifiName){
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
+                if (publicwifiInfo.get(i).getWifiName() == wifiName) {
                     publicwifiInfo.get(i).setSave(true);
                     publicwifiInfo.get(i).setConnected(false);
                     publicwifiInfo.get(i).setConnecting(false);
@@ -266,18 +273,18 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                 }
             }
             //断开网络后发送消息通知改变UI
-            EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi",0));
+            EventBus.getDefault().post(new WifiDisconnectEvent("publicWifi", 0));
             popupWindow.dismiss();
         }
     }
 
     private void connectAction() {
-        if (exsitsConfig!=null){
+        if (exsitsConfig != null) {
             int wcgID = mWifiManger.addNetwork(exsitsConfig);
             boolean b = mWifiManger.enableNetwork(wcgID, true);
 
-            for (int i=0;i<publicwifiInfo.size();i++){
-                if (publicwifiInfo.get(i).getWifiName()==wifiName){
+            for (int i = 0; i < publicwifiInfo.size(); i++) {
+                if (publicwifiInfo.get(i).getWifiName() == wifiName) {
                     publicwifiInfo.get(i).setSave(true);
                     //点击连接之后设置连接的状态
                     publicwifiInfo.get(i).setConnecting(true);//正在连接
@@ -285,9 +292,9 @@ public class PublicWifiItemListener implements AdapterView.OnItemClickListener,V
                     //发送消息，开始连接通知UI改变
                     EventBus.getDefault().post(new WifiConnectEvent("PublicWifiInfo", publicwifiInfo.get(i).getWifiName(), i));
                     publicWifiAdapter.notifyDataSetChanged();
-                }else {
+                } else {
                     WifiConfiguration existConfig = wifiAdmin.IsExsits(publicwifiInfo.get(i).getWifiName());
-                    if (existConfig!=null){
+                    if (existConfig != null) {
                         publicwifiInfo.get(i).setSave(true);
                         publicWifiAdapter.notifyDataSetChanged();
                     }

@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kingdom.test.clearprocess.EventBus.ScanWifiEvent;
 import com.kingdom.test.clearprocess.EventBus.WifiConnectEvent;
@@ -286,18 +287,24 @@ public class PriviteWifiItemListener implements AdapterView.OnItemClickListener,
 
     private void forgetWifi() {
         if (exsitsConfig!=null){
-            mWifiManger.removeNetwork(exsitsConfig.networkId);
-            for (int i=0;i<priviatewifiInfo.size();i++){
-                if (priviatewifiInfo.get(i).getWifiName()==wifiName){
-                    priviatewifiInfo.get(i).setSave(false);
-                    priviatewifiInfo.get(i).setConnected(false);
-                    priviatewifiInfo.get(i).setConnecting(false);
-                    privateWifiAdapter.notifyDataSetChanged();
+           boolean boo =  wifiAdmin.isConfigurationInThisAPP(exsitsConfig.networkId);
+            if (boo){
+                for (int i=0;i<priviatewifiInfo.size();i++){
+                    if (priviatewifiInfo.get(i).getWifiName()==wifiName){
+                        priviatewifiInfo.get(i).setSave(false);
+                        priviatewifiInfo.get(i).setConnected(false);
+                        priviatewifiInfo.get(i).setConnecting(false);
+                        privateWifiAdapter.notifyDataSetChanged();
+                    }
                 }
+                //忘记网络后发送消息通知改变UI，,通知可以开始扫描周围WIFi
+                EventBus.getDefault().post(new WifiDisconnectEvent("privatewifi",0));
+                popupWindow.dismiss();
+            }else {
+                Toast.makeText(wifiActivity,"android6.0以上不能修改其他应用程序配置的WIFI，请到系统设置中修改",Toast.LENGTH_SHORT).show();
             }
-            //忘记网络后发送消息通知改变UI，,通知可以开始扫描周围WIFi
-            EventBus.getDefault().post(new WifiDisconnectEvent("privatewifi",0));
-            popupWindow.dismiss();
+
+
         }
     }
 

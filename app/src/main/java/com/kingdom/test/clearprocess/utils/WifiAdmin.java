@@ -31,7 +31,8 @@ public  class WifiAdmin {
     private String mSSID = "";  
       
     private Context mContext = null;
-  
+    private boolean b;
+
     public WifiAdmin(Context context) {  
           
         mContext = context;  
@@ -290,5 +291,17 @@ public  class WifiAdmin {
             e.printStackTrace();
         }
         return false;
+    }
+
+    //android 6.0以上不能修改其他app配置过后的WIFi，所以判断该WIFI是否是该APP配置的
+    public boolean  isConfigurationInThisAPP(int netId){
+        mWifiManager.removeNetwork(netId);
+        List<WifiConfiguration> wifiConfigurations = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration config:wifiConfigurations) {
+            if (config.networkId==netId){
+                return false;//返回false代表没有被移除掉，故为其他APP配置的WIFi
+            }
+        }
+        return true;//返回true代表已经移除掉，故为该APP配置的WIFi
     }
 }  

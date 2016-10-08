@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Formatter;
@@ -241,15 +242,15 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
         //显示扫描结果,监听是否扫描完毕
         handle.post(update);
         //获取app缓存
-        getAppCache();
+        getAPPCacheFor6();
         //获取app的数据大小
-        getAPPDataSize();
+        getAPPDAtaSizeFor6();
         //扫描手机内的大文件
-        getBigFile();
+        getBigFileFor6();
         //扫描手机内的APK文件
-        getAPK();
+        getAPKFor6();
         //扫描获取日志文件
-        getLogFile();
+        getLogFileFor6();
     }
 //    /**
 //     * 窗口有焦点的时候，即所有的布局绘制完毕的时候，我们来获取布局的高度和myScrollView距离父类布局的顶部位置
@@ -360,6 +361,105 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
 //            }
 //        });
     }
+    //判断是否是Android 6.0,獲取動態權限
+    private  void  getAPPCacheFor6(){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkReadStoragPermission = ContextCompat.checkSelfPermission(RubbishActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(checkReadStoragPermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(RubbishActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},120);
+                return;
+            }else{
+                getAppCache();
+            }
+        } else {
+            getAppCache();
+        }
+    }
+    private  void  getAPPDAtaSizeFor6(){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkReadStoragPermission = ContextCompat.checkSelfPermission(RubbishActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(checkReadStoragPermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(RubbishActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},121);
+                return;
+            }else{
+                getAPPDataSize();
+            }
+        } else {
+            getAPPDataSize();
+        }
+    }
+    private  void  getBigFileFor6(){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkReadStoragPermission = ContextCompat.checkSelfPermission(RubbishActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(checkReadStoragPermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(RubbishActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},122);
+                return;
+            }else{
+                getBigFile();
+            }
+        } else {
+            getBigFile();
+        }
+    }
+    private  void  getAPKFor6(){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkReadStoragPermission = ContextCompat.checkSelfPermission(RubbishActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(checkReadStoragPermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(RubbishActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123);
+                return;
+            }else{
+                getAPK();
+            }
+        } else {
+            getAPK();
+        }
+    }
+    private  void  getLogFileFor6(){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkReadStoragPermission = ContextCompat.checkSelfPermission(RubbishActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(checkReadStoragPermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(RubbishActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},124);
+                return;
+            }else{
+                getLogFile();
+            }
+        } else {
+            getLogFile();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 120:
+                // Permission Granted
+                getAppCache();
+
+                break;
+            case 121:
+
+                getAPPDataSize();
+
+                break;
+            case 122:
+
+                getBigFile();
+
+                break;
+            case 123:
+
+                getAPK();
+
+                break;
+            case 124:
+
+                getLogFile();
+
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 
 
     //获取app的数据大小
@@ -408,7 +508,6 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
 //                });
 //            }
 //        }.start();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             new Thread() {
                 @Override
                 public void run() {
@@ -418,37 +517,40 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
                     mPackageManager = RubbishActivity.this.getPackageManager();
                     List<ApplicationInfo> appInfoList = mPackageManager.getInstalledApplications(0);
                     for (ApplicationInfo appInfo : appInfoList) {
-                        try {
-                            String packageName = appInfo.packageName;
-                            Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
-                            String appName = (String) mPackageManager.getApplicationLabel(appInfo);
-                            File file1 = new File("/data/data/" + packageName + "/files");
-                            if (file1.exists()) {
-                                long size = new FileUtils().getFolderSize(file1);
-                                if (size > 0) {
-                                    appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
-                                    appDataSzies += size;
+                        if (isSCanContinue){
+                            try {
+                                String packageName = appInfo.packageName;
+                                Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
+                                String appName = (String) mPackageManager.getApplicationLabel(appInfo);
+                                File file1 = new File("/data/data/" + packageName + "/files");
+                                if (file1.exists()) {
+                                    long size = new FileUtils().getFolderSize(file1);
+                                    if (size > 0) {
+                                        appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
+                                        appDataSzies += size;
 
-                                    Message msg = handler2.obtainMessage();
-                                    msg.obj = size;
-                                    handler2.sendMessage(msg);
+                                        Message msg = handler2.obtainMessage();
+                                        msg.obj = size;
+                                        handler2.sendMessage(msg);
+                                    }
                                 }
-                            }
-                            File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/files");
-                            if (file2.exists()) {
-                                long size = new FileUtils().getFolderSize(file2);
-                                if (size > 0) {
-                                    appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
-                                    appDataSzies += size;
+                                File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/files");
+                                if (file2.exists()) {
+                                    long size = new FileUtils().getFolderSize(file2);
+                                    if (size > 0) {
+                                        appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
+                                        appDataSzies += size;
 
-                                    Message msg = handler2.obtainMessage();
-                                    msg.obj = size;
-                                    handler2.sendMessage(msg);
+                                        Message msg = handler2.obtainMessage();
+                                        msg.obj = size;
+                                        handler2.sendMessage(msg);
+                                    }
                                 }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -461,19 +563,9 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
                     });
                 }
             }.start();
-        } else {
-            //android 6.0 以上动态获取读取内存卡的权限
-            ActivityCompat.requestPermissions(RubbishActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    120);
         }
 
-
-    }
-
     private void getBigFile() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             new Thread() {
                 @Override
                 public void run() {
@@ -494,20 +586,9 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
 
                 }
             }.start();
-
-        } else {
-            //android 6.0 以上动态获取读取内存卡的权限
-            ActivityCompat.requestPermissions(RubbishActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    121);
-        }
-
-
     }
 
     private void getAPK() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             new Thread() {
                 @Override
                 public void run() {
@@ -528,20 +609,9 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
 
                 }
             }.start();
-
-        } else {
-            //android 6.0 以上动态获取读取内存卡的权限
-            ActivityCompat.requestPermissions(RubbishActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    122);
-        }
-
-
     }
 
     private void getLogFile() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             new Thread() {
                 @Override
                 public void run() {
@@ -563,20 +633,10 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
 
                 }
             }.start();
-
-        } else {
-            //android 6.0 以上动态获取读取内存卡的权限
-            ActivityCompat.requestPermissions(RubbishActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    123);
-        }
     }
 
     //获取应用的缓存大小
     public void getAppCache() {
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             new Thread() {
                 @Override
                 public void run() {
@@ -586,39 +646,42 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
                     mPackageManager = RubbishActivity.this.getPackageManager();
                     List<ApplicationInfo> appInfoList = mPackageManager.getInstalledApplications(0);
                     for (ApplicationInfo appInfo : appInfoList) {
-                        try {
-                            String packageName = appInfo.packageName;
-                            Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
-                            String appName = (String) mPackageManager.getApplicationLabel(appInfo);
-                            File file1 = new File("/data/data/" + packageName + "/cache");
-                            if (file1.exists()) {
-                                long size = new FileUtils().getFolderSize(file1);
-                                if (size > 0) {
-                                    Log.i("zxc", file1.getPath() + "/" + size);
-                                    appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
-                                    appCacheSizes += size;
+                        if (isSCanContinue){
+                            try {
+                                String packageName = appInfo.packageName;
+                                Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
+                                String appName = (String) mPackageManager.getApplicationLabel(appInfo);
+                                File file1 = new File("/data/data/" + packageName + "/cache");
+                                if (file1.exists()) {
+                                    long size = new FileUtils().getFolderSize(file1);
+                                    if (size > 0) {
+                                        Log.i("zxc", file1.getPath() + "/" + size);
+                                        appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
+                                        appCacheSizes += size;
 
-                                    Message msg = handler2.obtainMessage();
-                                    msg.obj = size;
-                                    handler2.sendMessage(msg);
+                                        Message msg = handler2.obtainMessage();
+                                        msg.obj = size;
+                                        handler2.sendMessage(msg);
+                                    }
                                 }
-                            }
-                            File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/cache");
-                            if (file2.exists()) {
-                                long size = new FileUtils().getFolderSize(file2);
-                                if (size > 0) {
-                                    Log.i("zxc", file2.getPath() + "/" + size);
-                                    appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
-                                    appCacheSizes += size;
+                                File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/cache");
+                                if (file2.exists()) {
+                                    long size = new FileUtils().getFolderSize(file2);
+                                    if (size > 0) {
+                                        Log.i("zxc", file2.getPath() + "/" + size);
+                                        appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
+                                        appCacheSizes += size;
 
-                                    Message msg = handler2.obtainMessage();
-                                    msg.obj = size;
-                                    handler2.sendMessage(msg);
+                                        Message msg = handler2.obtainMessage();
+                                        msg.obj = size;
+                                        handler2.sendMessage(msg);
+                                    }
                                 }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -631,178 +694,7 @@ public class RubbishActivity extends AppCompatActivity implements View.OnClickLi
                     });
                 }
             }.start();
-        } else {
-//android 6.0 以上动态获取读取内存卡的权限
-            ActivityCompat.requestPermissions(RubbishActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    124);
-        }
-
-
     }
-
-    //android 6.0 以上动态获取读取内存卡的权限
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, String[] permissions, final int[] grantResults) {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                if (requestCode == 120) {
-                    if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                        appDataSzies = 0;
-                        isScanCompleteAppData = false;
-                        mPackageManager = RubbishActivity.this.getPackageManager();
-                        List<ApplicationInfo> appInfoList = mPackageManager.getInstalledApplications(0);
-                        for (ApplicationInfo appInfo : appInfoList) {
-                            try {
-                                String packageName = appInfo.packageName;
-                                Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
-                                String appName = (String) mPackageManager.getApplicationLabel(appInfo);
-                                File file1 = new File("/data/data/" + packageName + "/files");
-                                if (file1.exists()) {
-                                    long size = new FileUtils().getFolderSize(file1);
-                                    if (size > 0) {
-                                        appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
-                                        appDataSzies += size;
-                                    }
-                                }
-                                File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/files");
-                                if (file2.exists()) {
-                                    long size = new FileUtils().getFolderSize(file2);
-                                    if (size > 0) {
-                                        appDataInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
-                                        appDataSzies += size;
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //appData文件相关
-                                isScanCompleteAppData = true;
-                                mIvCompleteAppData.setVisibility(View.VISIBLE);
-                                mpbScanAppData.setVisibility(View.GONE);
-                            }
-                        });
-
-
-                    }
-                }
-                if (requestCode == 121) {
-                    if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                        File file = new File(Environment.getExternalStorageDirectory().getPath());
-                        isScanCompleteBigFile = false;
-                        bigFilesSize = 0;
-                        scanBigFile(file);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //大文件相关
-                                isScanCompleteBigFile = true;
-                                mIvCompleteBigFolder.setVisibility(View.VISIBLE);
-                                mpbScanBigFile.setVisibility(View.GONE);
-                            }
-                        });
-
-                    }
-                }
-
-
-                if (requestCode == 122) {
-                    if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                        File file = new File(Environment.getExternalStorageDirectory().getPath());
-                        isScanCompleteAPk = false;
-                        apkSizes = 0;
-
-                        scanApk(file);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //apk文件相关
-                                isScanCompleteAPk = true;
-                                mIvCompleteApk.setVisibility(View.VISIBLE);
-                                mpbScanAPk.setVisibility(View.GONE);
-                            }
-                        });
-                    }
-                }
-
-
-                if (requestCode == 123) {
-                    if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                        File file = new File(Environment.getExternalStorageDirectory().getPath());
-                        isScanCompleteLogFile = false;
-                        logFileSize = 0;
-                        scanLog(file);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-//                            //大文件相关
-//                            isScanCompleteBigFile =true;
-//                            mIvCompleteBigFolder.setVisibility(View.VISIBLE);
-//                            mpbScanBigFile.setVisibility(View.GONE);
-                            }
-                        });
-                    }
-                }
-
-                if (requestCode == 124) {
-                    if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                        appCacheSizes = 0;
-                        isScanCompleteAppCache = false;
-                        mPackageManager = RubbishActivity.this.getPackageManager();
-                        List<ApplicationInfo> appInfoList = mPackageManager.getInstalledApplications(0);
-                        for (ApplicationInfo appInfo : appInfoList) {
-                            try {
-                                String packageName = appInfo.packageName;
-                                Drawable appIcon = mPackageManager.getApplicationIcon(appInfo);
-                                String appName = (String) mPackageManager.getApplicationLabel(appInfo);
-                                File file1 = new File("/data/data/" + packageName + "/cache");
-                                if (file1.exists()) {
-                                    long size = new FileUtils().getFolderSize(file1);
-                                    if (size > 0) {
-                                        Log.i("zxc", file1.getPath() + "/" + size);
-                                        appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file1.getPath()));
-                                        appCacheSizes += size;
-                                    }
-                                }
-                                File file2 = new File(Environment.getExternalStorageDirectory().getPath() + "/Android/data/" + packageName + "/cache");
-                                if (file2.exists()) {
-                                    long size = new FileUtils().getFolderSize(file2);
-                                    if (size > 0) {
-                                        Log.i("zxc", file2.getPath() + "/" + size);
-                                        appCacheInfo.add(new RubbishInfoBean(appName, appIcon, size, file2.getPath()));
-                                        appCacheSizes += size;
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //appCache文件相关
-                                isScanCompleteAppCache = true;
-                                mIvCompleteAppCache.setVisibility(View.VISIBLE);
-                                mpbScanAppCache.setVisibility(View.GONE);
-                            }
-                        });
-
-                    }
-                }
-            }
-        }.start();
-
-    }
-
     //扫描大文件
     private void scanBigFile(File file) {
         File[] files = file.listFiles();

@@ -25,6 +25,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.google.android.gms:play-services-appindexing:8.1.0'
     compile 'com.android.support:design:23.1.1'
+    compile 'com.himanshuvirmani:volley-okhttp-gson-library:1.0.2'
     compile files('libs/app_process_library.jar')
     compile files('libs/nineoldandroids-2.4.0.jar')
     compile 'org.greenrobot:eventbus:3.0.0'
