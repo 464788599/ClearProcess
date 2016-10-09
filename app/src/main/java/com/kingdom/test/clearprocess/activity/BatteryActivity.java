@@ -39,7 +39,7 @@ public class BatteryActivity extends AppCompatActivity {
             String technology = intent.getStringExtra("technology");
 
             Log.i("statusdadadada",status+"");
-            //电池的状态
+            //电池的状态daadddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             switch (status){
                 case BatteryManager.BATTERY_STATUS_UNKNOWN://未知状态
                     break;
