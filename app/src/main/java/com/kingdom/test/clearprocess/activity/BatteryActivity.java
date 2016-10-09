@@ -53,7 +53,7 @@ public class BatteryActivity extends AppCompatActivity {
                     break;
             }
 
-            //电池健康的状态
+            //电池健康的状态5564654564654564564564444444444444444444444444444444444444444444444444899999999999999999999999999999
             switch (status){
                 case BatteryManager.BATTERY_HEALTH_UNKNOWN://未知状态
                     break;
